@@ -16,6 +16,7 @@ export default function Login() {
     setError('');
 
     try {
+      // This would be replaced with your actual API call
       const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: {
