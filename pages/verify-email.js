@@ -14,7 +14,7 @@ export default function VerifyEmail() {
       if (!token) return;
 
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/verify-email?token=${token}`);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/verify-email?token=${token}`);
         
         if (!response.ok) {
           const errorData = await response.json();
