@@ -110,12 +110,12 @@ export default function Dashboard() {
       </Head>
 
       {/* Top Navigation */}
-      <nav className="bg-white shadow-md">
+      <nav className="bg-white shadow-md text-gray-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <span className="text-2xl font-bold text-blue-600">ProApp</span>
+                <span className="text-2xl font-bold text-blue-600">CZ App</span>
               </div>
             </div>
             <div className="flex items-center space-x-4">
@@ -173,15 +173,15 @@ export default function Dashboard() {
             <div className="space-y-3">
               <div className="flex justify-between">
                 <span className="text-gray-600">Name</span>
-                <span className="font-medium">{user?.name}</span>
+                <span className="font-medium text-gray-800">{user?.name}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Email</span>
-                <span className="font-medium">{user?.email}</span>
+                <span className="font-medium text-gray-800">{user?.email}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Joined</span>
-                <span className="font-medium">January 2025</span>
+                <span className="font-medium text-gray-800">January 2025</span>
               </div>
             </div>
           </div>

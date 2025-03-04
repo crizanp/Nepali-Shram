@@ -1,6 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
+import { 
+  User, 
+  Lock, 
+  LogOut, 
+  LayoutDashboard 
+} from 'lucide-react';
 
 export default function Profile() {
   const [user, setUser] = useState(null);
@@ -80,252 +86,270 @@ export default function Profile() {
       setError(err.message || 'An error occurred while updating profile');
     } finally {
       setUpdating(false);
-    }};
-
-    const handleChangePassword = async (e) => {
-      e.preventDefault();
-      setUpdating(true);
-      setMessage('');
-      setError('');
-  
-      // Basic validation
-      if (newPassword !== confirmPassword) {
-        setError('New passwords do not match');
-        setUpdating(false);
-        return;
-      }
-  
-      try {
-        const token = localStorage.getItem('token');
-        
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/change-password`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({ 
-            currentPassword, 
-            newPassword 
-          }),
-        });
-        
-        const data = await response.json();
-        
-        if (!response.ok) {
-          throw new Error(data.message || 'Failed to change password');
-        }
-        
-        setCurrentPassword('');
-        setNewPassword('');
-        setConfirmPassword('');
-        setMessage('Password changed successfully');
-      } catch (err) {
-        setError(err.message || 'An error occurred while changing password');
-      } finally {
-        setUpdating(false);
-      }
-    };
-  
-    if (loading) {
-      return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50">
-          <p>Loading...</p>
-        </div>
-      );
     }
-  
+  };
+
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+    setUpdating(true);
+    setMessage('');
+    setError('');
+
+    if (newPassword !== confirmPassword) {
+      setError('New passwords do not match');
+      setUpdating(false);
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/change-password`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ 
+          currentPassword, 
+          newPassword 
+        }),
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to change password');
+      }
+      
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+      setMessage('Password changed successfully');
+    } catch (err) {
+      setError(err.message || 'An error occurred while changing password');
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    router.push('/login');
+  };
+
+  if (loading) {
     return (
-      <>
-        <Head>
-          <title>Profile | My App</title>
-        </Head>
-        <div className="min-h-screen bg-gray-100">
-          <nav className="bg-white shadow">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="flex justify-between h-16">
-                <div className="flex">
-                  <div className="flex-shrink-0 flex items-center">
-                    <span className="text-xl font-bold">My App</span>
-                  </div>
-                  <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
-                    <a
-                      href="/dashboard"
-                      className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
-                    >
-                      Dashboard
-                    </a>
-                    <a
-                      href="/profile"
-                      className="border-indigo-500 text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
-                    >
-                      Profile
-                    </a>
-                  </div>
-                </div>
-                <div className="flex items-center">
-                  <div className="ml-4 flex items-center md:ml-6">
-                    <button
-                      onClick={() => {
-                        localStorage.removeItem('token');
-                        router.push('/login');
-                      }}
-                      className="bg-indigo-600 p-1 rounded-full text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                    >
-                      <span className="px-2">Logout</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </nav>
-  
-          <div className="py-10">
-            <header>
-              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <h1 className="text-3xl font-bold leading-tight text-gray-900">Profile</h1>
-              </div>
-            </header>
-            <main>
-              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                {message && (
-                  <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mt-5" role="alert">
-                    <span className="block sm:inline">{message}</span>
-                  </div>
-                )}
-                {error && (
-                  <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mt-5" role="alert">
-                    <span className="block sm:inline">{error}</span>
-                  </div>
-                )}
-                
-                <div className="bg-white shadow overflow-hidden sm:rounded-lg mt-5">
-                  <div className="px-4 py-5 sm:px-6">
-                    <h3 className="text-lg leading-6 font-medium text-gray-900">Update Profile</h3>
-                  </div>
-                  <div className="border-t border-gray-200 px-4 py-5 sm:p-6">
-                    <form onSubmit={handleUpdateProfile} className="space-y-6">
-                      <div>
-                        <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                          Name
-                        </label>
-                        <div className="mt-1">
-                          <input
-                            id="name"
-                            name="name"
-                            type="text"
-                            required
-                            className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                          />
-                        </div>
-                      </div>
-                      
-                      <div>
-                        <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                          Email
-                        </label>
-                        <div className="mt-1">
-                          <input
-                            id="email"
-                            name="email"
-                            type="email"
-                            disabled
-                            className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 bg-gray-50 sm:text-sm"
-                            value={user?.email || ''}
-                          />
-                          <p className="mt-1 text-sm text-gray-500">Email cannot be changed</p>
-                        </div>
-                      </div>
-                      
-                      <div>
-                        <button
-                          type="submit"
-                          className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                          disabled={updating}
-                        >
-                          {updating ? 'Updating...' : 'Update Profile'}
-                        </button>
-                      </div>
-                    </form>
-                  </div>
-                </div>
-                
-                <div className="bg-white shadow overflow-hidden sm:rounded-lg mt-8">
-                  <div className="px-4 py-5 sm:px-6">
-                    <h3 className="text-lg leading-6 font-medium text-gray-900">Change Password</h3>
-                  </div>
-                  <div className="border-t border-gray-200 px-4 py-5 sm:p-6">
-                    <form onSubmit={handleChangePassword} className="space-y-6">
-                      <div>
-                        <label htmlFor="current-password" className="block text-sm font-medium text-gray-700">
-                          Current Password
-                        </label>
-                        <div className="mt-1">
-                          <input
-                            id="current-password"
-                            name="currentPassword"
-                            type="password"
-                            required
-                            className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                            value={currentPassword}
-                            onChange={(e) => setCurrentPassword(e.target.value)}
-                          />
-                        </div>
-                      </div>
-                      
-                      <div>
-                        <label htmlFor="new-password" className="block text-sm font-medium text-gray-700">
-                          New Password
-                        </label>
-                        <div className="mt-1">
-                          <input
-                            id="new-password"
-                            name="newPassword"
-                            type="password"
-                            required
-                            className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                            value={newPassword}
-                            onChange={(e) => setNewPassword(e.target.value)}
-                          />
-                        </div>
-                      </div>
-                      
-                      <div>
-                        <label htmlFor="confirm-password" className="block text-sm font-medium text-gray-700">
-                          Confirm New Password
-                        </label>
-                        <div className="mt-1">
-                          <input
-                            id="confirm-password"
-                            name="confirmPassword"
-                            type="password"
-                            required
-                            className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                            value={confirmPassword}
-                            onChange={(e) => setConfirmPassword(e.target.value)}
-                          />
-                        </div>
-                      </div>
-                      
-                      <div>
-                        <button
-                          type="submit"
-                          className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                          disabled={updating}
-                        >
-                          {updating ? 'Changing...' : 'Change Password'}
-                        </button>
-                      </div>
-                    </form>
-                  </div>
-                </div>
-              </div>
-            </main>
-          </div>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-blue-500 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading profile...</p>
         </div>
-      </>
+      </div>
     );
   }
-  
+
+  return (
+    <div className="min-h-screen bg-gray-100">
+      <Head>
+        <title>Profile | Professional App</title>
+      </Head>
+
+      {/* Top Navigation */}
+      <nav className="bg-white shadow-md">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between h-16 items-center">
+            <div className="flex items-center space-x-4">
+              <span className="text-2xl font-bold text-blue-600">Cz App</span>
+              <div className="hidden md:flex space-x-4">
+                <button 
+                  onClick={() => router.push('/dashboard')}
+                  className="text-gray-600 hover:text-blue-600 flex items-center"
+                >
+                  <LayoutDashboard className="h-4 w-4 mr-2" />
+                  Dashboard
+                </button>
+                <button 
+                  onClick={() => router.push('/profile')}
+                  className="text-blue-600 flex items-center"
+                >
+                  <User className="h-4 w-4 mr-2" />
+                  Profile
+                </button>
+              </div>
+            </div>
+            <div className="flex items-center space-x-4">
+              <button 
+                onClick={handleLogout}
+                className="bg-blue-500 text-white px-3 py-1.5 rounded-md hover:bg-blue-600 transition flex items-center"
+              >
+                <LogOut className="h-4 w-4 mr-2" />
+                Logout
+              </button>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      {/* Main Profile Content */}
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-gray-700">
+        <header className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">Profile Settings</h1>
+          <p className="text-gray-500 mt-2">Manage your account information and security settings.</p>
+        </header>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {/* Profile Information */}
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="flex items-center mb-6">
+              <User className="h-8 w-8 text-blue-500 mr-4" />
+              <h2 className="text-xl font-semibold text-gray-800">Profile Information</h2>
+            </div>
+
+            {message && (
+              <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+                {message}
+              </div>
+            )}
+            {error && (
+              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                {error}
+              </div>
+            )}
+
+            <form onSubmit={handleUpdateProfile} className="space-y-4">
+              <div>
+                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+                  Full Name
+                </label>
+                <input
+                  id="name"
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                  Email Address
+                </label>
+                <input
+                  id="email"
+                  type="email"
+                  value={user?.email || ''}
+                  disabled
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-100 cursor-not-allowed"
+                />
+                <p className="text-xs text-gray-500 mt-1">Email cannot be changed</p>
+              </div>
+
+              <button
+                type="submit"
+                disabled={updating}
+                className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 transition disabled:opacity-50"
+              >
+                {updating ? 'Updating...' : 'Update Profile'}
+              </button>
+            </form>
+          </div>
+
+          {/* Security Settings */}
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="flex items-center mb-6">
+              <Lock className="h-8 w-8 text-green-500 mr-4" />
+              <h2 className="text-xl font-semibold text-gray-800">Change Password</h2>
+            </div>
+
+            <form onSubmit={handleChangePassword} className="space-y-4">
+              <div>
+                <label htmlFor="current-password" className="block text-sm font-medium text-gray-700 mb-2">
+                  Current Password
+                </label>
+                <input
+                  id="current-password"
+                  type="password"
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="new-password" className="block text-sm font-medium text-gray-700 mb-2">
+                  New Password
+                </label>
+                <input
+                  id="new-password"
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  required
+                  minLength={8}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <p className="text-xs text-gray-500 mt-1">Minimum 8 characters</p>
+              </div>
+
+              <div>
+                <label htmlFor="confirm-password" className="block text-sm font-medium text-gray-700 mb-2">
+                  Confirm New Password
+                </label>
+                <input
+                  id="confirm-password"
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                  minLength={8}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={updating}
+                className="w-full bg-green-500 text-white py-2 rounded-md hover:bg-green-600 transition disabled:opacity-50"
+              >
+                {updating ? 'Changing Password...' : 'Change Password'}
+              </button>
+            </form>
+          </div>
+        </div>
+
+        {/* Account Danger Zone */}
+        <div className="mt-8 bg-white rounded-lg shadow-md p-6">
+          <div className="flex items-center mb-6">
+            <div className="w-full">
+              <h2 className="text-xl font-semibold text-red-600">Danger Zone</h2>
+              <p className="text-sm text-gray-500">Proceed with caution</p>
+            </div>
+          </div>
+          <div className="flex justify-between items-center">
+            <div>
+              <h3 className="text-lg font-medium text-gray-900">Delete Account</h3>
+              <p className="text-sm text-gray-500">Permanently remove your account and all associated data</p>
+            </div>
+            <button
+              onClick={() => {
+                // Implement account deletion logic
+                const confirmDelete = window.confirm('Are you sure you want to delete your account? This action cannot be undone.');
+                if (confirmDelete) {
+                  // Add account deletion API call
+                  console.log('Account deletion requested');
+                }
+              }}
+              className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition"
+            >
+              Delete Account
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
