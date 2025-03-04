@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import Head from 'next/head';
-
+import { authApi } from '../utils/api';
 export default function ResetPassword() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -31,12 +31,7 @@ export default function ResetPassword() {
       // Validate token with your API
       const validateToken = async () => {
         try {
-          const response = await fetch(`/api/auth/validate-reset-token?token=${token}`);
-          const data = await response.json();
-          
-          if (!response.ok) {
-            throw new Error(data.message || 'Invalid token');
-          }
+          await authApi.validateResetToken(token);
           
           setTokenValid(true);
         } catch (err) {

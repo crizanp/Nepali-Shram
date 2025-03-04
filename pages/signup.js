@@ -2,6 +2,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
+import { authApi } from '../utils/api'; 
 
 export default function Signup() {
   const [name, setName] = useState('');
@@ -25,22 +26,8 @@ export default function Signup() {
     }
 
     try {
-      // This would be replaced with your actual API call
-      const response = await fetch('/api/auth/signup', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ name, email, password }),
-      });
+      const data = await authApi.signup(name, email, password);
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Signup failed');
-      }
-
-      // Redirect to login page with success message
       router.push('/login?registered=true');
     } catch (err) {
       setError(err.message || 'An error occurred during signup');

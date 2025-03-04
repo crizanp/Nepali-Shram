@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Head from 'next/head';
+import { authApi } from '../utils/api'; 
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState('');
@@ -15,20 +16,7 @@ export default function ForgotPassword() {
     setMessage('');
 
     try {
-      // This would be replaced with your actual API call
-      const response = await fetch('/api/auth/forgot-password', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Request failed');
-      }
+      await authApi.forgotPassword(email);
 
       setMessage('If an account with that email exists, we have sent a password reset link.');
       setEmail('');
