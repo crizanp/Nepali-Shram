@@ -2,6 +2,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
+import { authApi } from '../utils/api'; // Update path as needed
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -16,20 +17,7 @@ export default function Login() {
     setError('');
 
     try {
-      // This would be replaced with your actual API call
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Login failed');
-      }
+      const data = await authApi.login(email, password);
 
       // Store token in localStorage or cookies
       localStorage.setItem('token', data.token);
