@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:5000/api'; // Your backend URL
+const API_URL = `${process.env.NEXT_PUBLIC_API_BASE_URL}`; // Your backend URL
 
 export const api = {
   request: async (endpoint, method = 'GET', body = null, includeToken = true) => {

@@ -25,7 +25,7 @@ export default function Profile() {
           return;
         }
         
-        const response = await fetch('http://localhost:5000/api/auth/me', {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/me`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -59,7 +59,7 @@ export default function Profile() {
     try {
       const token = localStorage.getItem('token');
       
-      const response = await fetch('/api/auth/update-profile', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/update-profile`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -98,7 +98,7 @@ export default function Profile() {
       try {
         const token = localStorage.getItem('token');
         
-        const response = await fetch('/api/auth/change-password', {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/change-password`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
