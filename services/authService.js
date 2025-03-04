@@ -109,7 +109,7 @@ export const useAuth = () => {
 
 export const getUser = async () => {
   try {
-    const response = await api.get('/auth/me');
+    const response = await api.get('http://localhost:5000/auth/me');
     return response.data;
   } catch (err) {
     // Handle error or token expiration

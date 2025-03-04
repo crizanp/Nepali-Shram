@@ -11,6 +11,7 @@ export default function Signup() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
   const router = useRouter();
 
   const handleSubmit = async (e) => {
@@ -26,15 +27,45 @@ export default function Signup() {
     }
 
     try {
-      const data = await authApi.signup(name, email, password);
+      const response = await authApi.signup(name, email, password);
 
-      router.push('/login?registered=true');
+      // Set state to show email verification message
+      setEmailSent(true);
     } catch (err) {
       setError(err.message || 'An error occurred during signup');
     } finally {
       setLoading(false);
     }
   };
+
+  // If email has been sent, show verification instructions
+  if (emailSent) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-md w-full space-y-8">
+          <div className="text-center">
+            <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
+              Verify Your Email
+            </h2>
+            <p className="mt-2 text-sm text-gray-600">
+              We've sent a verification link to <strong>{email}</strong>. 
+              Please check your inbox and click the link to verify your account.
+            </p>
+            <p className="mt-4 text-sm text-gray-600">
+              Didn't receive the email? 
+              <button 
+                onClick={handleSubmit} 
+                className="ml-1 text-indigo-600 hover:text-indigo-500"
+                disabled={loading}
+              >
+                Resend verification email
+              </button>
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>

@@ -1,4 +1,3 @@
-// File: utils/api.js
 const API_URL = 'http://localhost:5000/api'; // Your backend URL
 
 export const api = {
@@ -13,7 +12,7 @@ export const api = {
       },
       ...(body ? { body: JSON.stringify(body) } : {})
     };
-
+    
     try {
       const response = await fetch(`${API_URL}${endpoint}`, config);
       
@@ -33,27 +32,35 @@ export const api = {
 
 // Helper function for authentication-related requests
 export const authApi = {
-  signup: (name, email, password) => 
+  signup: (name, email, password) =>
     api.request('/auth/signup', 'POST', { name, email, password }, false),
   
-  login: (email, password) => 
+  login: (email, password) =>
     api.request('/auth/login', 'POST', { email, password }, false),
   
-  forgotPassword: (email) => 
+  forgotPassword: (email) =>
     api.request('/auth/forgot-password', 'POST', { email }, false),
   
-  resetPassword: (token, password) => 
+  resetPassword: (token, password) =>
     api.request('/auth/reset-password', 'POST', { token, password }, false),
   
-  validateResetToken: (token) => 
+  validateResetToken: (token) =>
     api.request(`/auth/validate-reset-token?token=${token}`, 'GET', null, false),
   
-  getProfile: () => 
+  // New method for email verification
+  verifyEmail: (token) =>
+    api.request(`/auth/verify-email?token=${token}`, 'GET', null, false),
+  
+  // New method to resend verification email
+  resendVerificationEmail: (email) =>
+    api.request('/auth/resend-verification-email', 'POST', { email }, false),
+  
+  getProfile: () =>
     api.request('/auth/me'),
   
-  updateProfile: (name) => 
+  updateProfile: (name) =>
     api.request('/auth/update-profile', 'PUT', { name }),
   
-  changePassword: (currentPassword, newPassword) => 
+  changePassword: (currentPassword, newPassword) =>
     api.request('/auth/change-password', 'PUT', { currentPassword, newPassword })
 };

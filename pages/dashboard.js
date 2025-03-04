@@ -7,44 +7,45 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
-  useEffect(() => {
-    const checkAuth = async () => {
+ // AuthContext.js
+useEffect(() => {
+  if (typeof window !== 'undefined') {
+    async function loadUserFromLocalStorage() {
       try {
-        // Get token from localStorage
+        // Directly get the token as a string, no JSON parsing
         const token = localStorage.getItem('token');
         
-        if (!token) {
-          // Redirect to login if no token
-          router.push('/login');
-          return;
-        }
-        
-        // Verify token with your API
-        const response = await fetch('http://localhost:5000/api/auth/me', {
-          headers: {
-            'Authorization': `Bearer ${token}`
+        if (token) {
+          const response = await fetch('http://localhost:5000/api/auth/me', {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          });
+          
+          if (!response.ok) {
+            throw new Error('Token verification failed');
           }
-        });
-        
-        if (!response.ok) {
-          throw new Error('Authentication failed');
+          
+          const userData = await response.json();
+          setUser(userData);
         }
-        
-        const userData = await response.json();
-        setUser(userData);
       } catch (error) {
-        console.error('Auth error:', error);
-        // Clear invalid token
+        console.error('Auth verification error:', error);
         localStorage.removeItem('token');
-        // Redirect to login
-        router.push('/login');
+        setUser(null);
+        if (window.location.pathname !== '/login') {
+          router.push('/login');
+        }
       } finally {
         setLoading(false);
       }
-    };
+    }
     
-    checkAuth();
-  }, [router]);
+    loadUserFromLocalStorage();
+  }
+}, [router]);
 
   const handleLogout = () => {
     localStorage.removeItem('token');

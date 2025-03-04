@@ -7,30 +7,33 @@ import { authApi } from '../utils/api'; // Update path as needed
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(false); // Add this line
+
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
+ // Login component
+ const handleSubmit = async (e) => {
+  e.preventDefault();
+  setLoading(true);
+  setError('');
 
-    try {
-      const data = await authApi.login(email, password);
+  try {
+    // Modify your authApi.login to accept rememberMe
+    const data = await authApi.login(email, password, rememberMe);
 
-      // Store token in localStorage or cookies
-      localStorage.setItem('token', data.token);
-      
-      // Redirect to dashboard
-      router.push('/dashboard');
-    } catch (err) {
-      setError(err.message || 'An error occurred during login');
-    } finally {
-      setLoading(false);
-    }
-  };
-
+    // Store token in localStorage or cookies
+    localStorage.setItem('token', data.token);
+    
+    // Redirect to dashboard
+    router.push('/dashboard');
+  } catch (err) {
+    setError(err.message || 'An error occurred during login');
+  } finally {
+    setLoading(false);
+  }
+};
   return (
     <>
       <Head>
@@ -92,15 +95,17 @@ export default function Login() {
 
             <div className="flex items-center justify-between">
               <div className="flex items-center">
-                <input
-                  id="remember-me"
-                  name="remember-me"
-                  type="checkbox"
-                  className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                />
-                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
-                  Remember me
-                </label>
+              <input
+              id="remember-me"
+              name="remember-me"
+              type="checkbox"
+              className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+            />
+            <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
+              Remember me
+            </label>
               </div>
 
               <div className="text-sm">
