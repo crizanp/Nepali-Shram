@@ -10,9 +10,9 @@ export default function VerifyEmail() {
   useEffect(() => {
     const verifyEmail = async () => {
       const { token } = router.query;
-
+  
       if (!token) return;
-
+  
       try {
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/verify-email?token=${token}`);
         
@@ -20,7 +20,7 @@ export default function VerifyEmail() {
           const errorData = await response.json();
           throw new Error(errorData.message);
         }
-
+  
         setStatus('Email verified successfully! Redirecting to login...');
         
         // Redirect to login after 3 seconds
@@ -32,10 +32,9 @@ export default function VerifyEmail() {
         setError(err.message);
       }
     };
-
+  
     verifyEmail();
-  }, [router.query]);
-
+  }, [router, router.query]); 
   return (
     <>
       <Head>

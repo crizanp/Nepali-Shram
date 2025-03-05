@@ -48,11 +48,11 @@ export default function Signup() {
               Verify Your Email
             </h2>
             <p className="mt-2 text-sm text-gray-600">
-              We've sent a verification link to <strong>{email}</strong>. 
+              We&apos;ve sent a verification link to <strong>{email}</strong>. 
               Please check your inbox and click the link to verify your account.
             </p>
             <p className="mt-4 text-sm text-gray-600">
-              Didn't receive the email? 
+              Didn&apos;t receive the email? 
               <button 
                 onClick={handleSubmit} 
                 className="ml-1 text-indigo-600 hover:text-indigo-500"
