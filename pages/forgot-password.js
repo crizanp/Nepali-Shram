@@ -134,10 +134,10 @@ export default function ForgotPassword() {
 
             {/* Back to Login Link */}
             <div className="text-center pt-2">
-              <a href="/login" className="inline-flex items-center space-x-2 font-medium hover:underline cursor-pointer transition-colors duration-200" style={{ color: '#003479' }}>
+              <Link href="/login" className="inline-flex items-center space-x-2 font-medium hover:underline cursor-pointer transition-colors duration-200" style={{ color: '#003479' }}>
                 <ArrowLeft className="h-4 w-4" />
                 <span>Back to login</span>
-              </a>
+              </Link>
             </div>
           </div>
         </div>

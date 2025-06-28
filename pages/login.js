@@ -2,41 +2,75 @@ import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
-import { authApi } from '../utils/api'; // Update path as needed
-import { Eye, EyeOff, Lock, LogIn, Mail } from 'lucide-react';
+import { authApi } from '../utils/api';
+import { Eye, EyeOff, Lock, LogIn, Mail, RefreshCw } from 'lucide-react';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
-  const [showPassword, setShowPassword] = useState(false); // <-- Add this line
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [unverifiedEmail, setUnverifiedEmail] = useState('');
+  const [resendingVerification, setResendingVerification] = useState(false);
+  const [verificationMessage, setVerificationMessage] = useState('');
   const emailInputRef = useRef(null);
 
   const router = useRouter();
 
-  // Login component
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
+    setUnverifiedEmail('');
+    setVerificationMessage('');
 
     try {
-      // Modify your authApi.login to accept rememberMe
       const data = await authApi.login(email, password, rememberMe);
-
-      // Store token in localStorage or cookies
       localStorage.setItem('token', data.token);
-
-      // Redirect to dashboard
       router.push('/dashboard');
     } catch (err) {
-      setError(err.message || 'An error occurred during login');
+      const errorMessage = err.message || 'An error occurred during login';
+      setError(errorMessage);
+      
+      // Check if the error is about unverified email
+      if (errorMessage.includes('verify your email')) {
+        setUnverifiedEmail(email);
+      }
     } finally {
       setLoading(false);
     }
   };
+
+  const handleResendVerification = async () => {
+    setResendingVerification(true);
+    setVerificationMessage('');
+    setError('');
+
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/resend-verification-email`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: unverifiedEmail }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message);
+      }
+
+      setVerificationMessage('Verification email sent! Please check your inbox and click the verification link.');
+      setUnverifiedEmail(''); // Hide the resend section after success
+    } catch (err) {
+      setError(err.message || 'Failed to resend verification email');
+    } finally {
+      setResendingVerification(false);
+    }
+  };
+
   useEffect(() => {
     if (emailInputRef.current) {
       emailInputRef.current.focus();
@@ -45,23 +79,19 @@ export default function Login() {
 
   return (
     <>
-      {/* Head component would go here in your Next.js app */}
       <div className="min-h-screen flex flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8"
         style={{
           background: 'linear-gradient(135deg, #003479 0%, #0054a6 40%, rgb(144, 180, 255) 70%, rgb(173, 199, 255) 100%)'
         }}>
 
-        {/* Logo at the top */}
-
-
-        {/* Login Card - Made wider */}
+        {/* Login Card */}
         <div className="bg-white rounded-xl shadow-2xl p-8 w-full max-w-xl">
           <div className="mb-4">
             {/* Gradient Border Wrapper */}
             <div className="w-40 h-40 mx-auto p-1 rounded-3xl"
               style={{
                 background: 'linear-gradient(45deg, #003479, rgb(23, 143, 183))',
-                borderRadius: '1.7rem' // 24px = rounded-3xl
+                borderRadius: '1.7rem'
               }}
             >
               {/* Inner white box */}
@@ -75,20 +105,45 @@ export default function Login() {
             </div>
           </div>
 
-
           <div className="text-center mb-4">
             <h2 className="text-2xl font-bold mb-1" style={{ color: '#003479' }}>SIGN IN</h2>
             <p className="text-sm text-gray-600">
               Or{' '}
-              <a href="/signup" className="font-medium hover:underline cursor-pointer transition-colors duration-200" style={{ color: '#003479' }}>
+              <Link href="/signup" className="font-medium hover:underline cursor-pointer transition-colors duration-200" style={{ color: '#003479' }}>
                 create a new account
-              </a>
+              </Link>
             </p>
           </div>
 
-          {error && (
+          {error && !unverifiedEmail && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4" role="alert">
               <span className="block sm:inline">{error}</span>
+            </div>
+          )}
+
+          {verificationMessage && (
+            <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-4" role="alert">
+              <span className="block sm:inline">{verificationMessage}</span>
+            </div>
+          )}
+
+          {/* Email Verification Alert */}
+          {unverifiedEmail && (
+            <div className="bg-orange-50 border border-orange-200 text-orange-700 px-4 py-3 rounded-lg mb-4" role="alert">
+              <div className="mb-3">
+                <strong>Email Verification Required</strong>
+                <p className="text-sm mt-1">
+                  Please verify your email address before signing in. We've sent a verification link to <strong>{unverifiedEmail}</strong>.
+                </p>
+              </div>
+              <button
+                onClick={handleResendVerification}
+                disabled={resendingVerification}
+                className="inline-flex items-center space-x-2 text-orange-700 hover:text-orange-800 font-medium text-sm hover:underline cursor-pointer transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <RefreshCw className={`h-4 w-4 ${resendingVerification ? 'animate-spin' : ''}`} />
+                <span>{resendingVerification ? 'Sending...' : 'Resend verification email'}</span>
+              </button>
             </div>
           )}
 
@@ -114,7 +169,6 @@ export default function Login() {
                 onFocus={(e) => e.target.style.boxShadow = '0 0 0 2px #003479'}
                 onBlur={(e) => e.target.style.boxShadow = 'none'}
               />
-
             </div>
 
             {/* Password Input */}
@@ -166,9 +220,9 @@ export default function Login() {
               </div>
 
               <div className="text-sm">
-                <a href="/forgot-password" className="font-medium hover:underline cursor-pointer transition-colors duration-200" style={{ color: '#003479' }}>
+                <Link href="/forgot-password" className="font-medium hover:underline cursor-pointer transition-colors duration-200" style={{ color: '#003479' }}>
                   Forgot your password?
-                </a>
+                </Link>
               </div>
             </div>
 
@@ -197,6 +251,22 @@ export default function Login() {
               <span>{loading ? 'Signing in...' : 'SIGN IN'}</span>
             </button>
           </div>
+
+          {/* Additional Help */}
+          {unverifiedEmail && (
+            <div className="mt-6 pt-4 border-t border-gray-200 text-center">
+              <p className="text-sm text-gray-600">
+                Having trouble with email verification?{' '}
+                <Link 
+                  href={`/verify-email?email=${encodeURIComponent(unverifiedEmail)}`}
+                  className="font-medium hover:underline cursor-pointer transition-colors duration-200"
+                  style={{ color: '#003479' }}
+                >
+                  Go to verification page
+                </Link>
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </>

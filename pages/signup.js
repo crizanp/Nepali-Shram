@@ -15,26 +15,94 @@ export default function Signup() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
+  const [touched, setTouched] = useState({
+    name: false,
+    email: false,
+    password: false,
+    confirmPassword: false
+  });
   const nameInputRef = useRef(null);
 
   const router = useRouter();
 
+  // Validation functions
+  const validateName = (name) => {
+    if (!name.trim()) return 'Full name is required';
+    if (name.trim().length < 2) return 'Name must be at least 2 characters';
+    return '';
+  };
+
+  const validateEmail = (email) => {
+    if (!email.trim()) return 'Email address is required';
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) return 'Please enter a valid email address';
+    return '';
+  };
+
+  const validatePassword = (password) => {
+    if (!password) return 'Password is required';
+    if (password.length < 8) return 'Password must be at least 8 characters';
+    if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(password)) {
+      return 'Password must contain at least one uppercase letter, one lowercase letter, and one number';
+    }
+    return '';
+  };
+
+  const validateConfirmPassword = (confirmPassword, password) => {
+    if (!confirmPassword) return 'Please confirm your password';
+    if (confirmPassword !== password) return 'Passwords do not match';
+    return '';
+  };
+
+  // Get validation errors
+  const nameError = touched.name ? validateName(name) : '';
+  const emailError = touched.email ? validateEmail(email) : '';
+  const passwordError = touched.password ? validatePassword(password) : '';
+  const confirmPasswordError = touched.confirmPassword ? validateConfirmPassword(confirmPassword, password) : '';
+
+  // Check if form is valid
+  const isFormValid = () => {
+    return !validateName(name) && 
+           !validateEmail(email) && 
+           !validatePassword(password) && 
+           !validateConfirmPassword(confirmPassword, password) &&
+           name.trim() && 
+           email.trim() && 
+           password && 
+           confirmPassword;
+  };
+
+  const handleBlur = (field) => {
+    setTouched(prev => ({ ...prev, [field]: true }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
-    setError('');
+    
+    // Mark all fields as touched to show validation errors
+    setTouched({
+      name: true,
+      email: true,
+      password: true,
+      confirmPassword: true
+    });
 
-    // Basic validation
-    if (password !== confirmPassword) {
-      setError('Passwords do not match');
-      setLoading(false);
+    // Validate all fields
+    const nameErr = validateName(name);
+    const emailErr = validateEmail(email);
+    const passwordErr = validatePassword(password);
+    const confirmPasswordErr = validateConfirmPassword(confirmPassword, password);
+
+    if (nameErr || emailErr || passwordErr || confirmPasswordErr) {
+      setError('Please fix the errors below before submitting');
       return;
     }
 
+    setLoading(true);
+    setError('');
+
     try {
       const response = await authApi.signup(name, email, password);
-
-      // Set state to show email verification message
       setEmailSent(true);
     } catch (err) {
       setError(err.message || 'An error occurred during signup');
@@ -128,7 +196,7 @@ export default function Signup() {
             <div className="w-40 h-40 mx-auto p-1 rounded-3xl"
               style={{
                 background: 'linear-gradient(45deg, #003479, rgb(23, 143, 183))',
-                borderRadius: '1.7rem' // 24px = rounded-3xl
+                borderRadius: '1.7rem'
               }}
             >
               {/* Inner white box */}
@@ -159,11 +227,11 @@ export default function Signup() {
           )}
 
           {/* Signup Form */}
-          <div className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4">
             {/* Name Input */}
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <User className="h-5 w-5 text-gray-400" />
+                <User className={`h-5 w-5 ${nameError ? 'text-red-400' : 'text-gray-400'}`} />
               </div>
               <input
                 ref={nameInputRef}
@@ -172,20 +240,27 @@ export default function Signup() {
                 type="text"
                 autoComplete="name"
                 required
-                placeholder="Full Name"
+                placeholder="Full Name *"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent outline-none text-gray-700 placeholder-gray-400 transition-all duration-200"
-                style={{ focusRingColor: '#003479' }}
-                onFocus={(e) => e.target.style.boxShadow = '0 0 0 2px #003479'}
-                onBlur={(e) => e.target.style.boxShadow = 'none'}
+                className={`w-full pl-12 pr-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent outline-none text-gray-700 placeholder-gray-400 transition-all duration-200 ${
+                  nameError ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                }`}
+                onFocus={(e) => e.target.style.boxShadow = nameError ? '0 0 0 2px #ef4444' : '0 0 0 2px #003479'}
+                onBlur={(e) => {
+                  handleBlur('name');
+                  e.target.style.boxShadow = 'none';
+                }}
               />
+              {nameError && (
+                <p className="mt-1 text-sm text-red-600">{nameError}</p>
+              )}
             </div>
 
             {/* Email Input */}
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <Mail className="h-5 w-5 text-gray-400" />
+                <Mail className={`h-5 w-5 ${emailError ? 'text-red-400' : 'text-gray-400'}`} />
               </div>
               <input
                 id="email-address"
@@ -193,20 +268,27 @@ export default function Signup() {
                 type="email"
                 autoComplete="email"
                 required
-                placeholder="Email address"
+                placeholder="Email address *"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent outline-none text-gray-700 placeholder-gray-400 transition-all duration-200"
-                style={{ focusRingColor: '#003479' }}
-                onFocus={(e) => e.target.style.boxShadow = '0 0 0 2px #003479'}
-                onBlur={(e) => e.target.style.boxShadow = 'none'}
+                className={`w-full pl-12 pr-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent outline-none text-gray-700 placeholder-gray-400 transition-all duration-200 ${
+                  emailError ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                }`}
+                onFocus={(e) => e.target.style.boxShadow = emailError ? '0 0 0 2px #ef4444' : '0 0 0 2px #003479'}
+                onBlur={(e) => {
+                  handleBlur('email');
+                  e.target.style.boxShadow = 'none';
+                }}
               />
+              {emailError && (
+                <p className="mt-1 text-sm text-red-600">{emailError}</p>
+              )}
             </div>
 
             {/* Password Input */}
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <Lock className="h-5 w-5 text-gray-400" />
+                <Lock className={`h-5 w-5 ${passwordError ? 'text-red-400' : 'text-gray-400'}`} />
               </div>
               <input
                 id="password"
@@ -214,12 +296,17 @@ export default function Signup() {
                 type={showPassword ? "text" : "password"}
                 autoComplete="new-password"
                 required
-                placeholder="Password"
+                placeholder="Password *"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full pl-12 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent outline-none text-gray-700 placeholder-gray-400 transition-all duration-200"
-                onFocus={(e) => e.target.style.boxShadow = '0 0 0 2px #003479'}
-                onBlur={(e) => e.target.style.boxShadow = 'none'}
+                className={`w-full pl-12 pr-12 py-3 border rounded-lg focus:ring-2 focus:border-transparent outline-none text-gray-700 placeholder-gray-400 transition-all duration-200 ${
+                  passwordError ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                }`}
+                onFocus={(e) => e.target.style.boxShadow = passwordError ? '0 0 0 2px #ef4444' : '0 0 0 2px #003479'}
+                onBlur={(e) => {
+                  handleBlur('password');
+                  e.target.style.boxShadow = 'none';
+                }}
               />
               <button
                 type="button"
@@ -232,12 +319,15 @@ export default function Signup() {
                   <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
                 )}
               </button>
+              {passwordError && (
+                <p className="mt-1 text-sm text-red-600">{passwordError}</p>
+              )}
             </div>
 
             {/* Confirm Password Input */}
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <Lock className="h-5 w-5 text-gray-400" />
+                <Lock className={`h-5 w-5 ${confirmPasswordError ? 'text-red-400' : 'text-gray-400'}`} />
               </div>
               <input
                 id="confirm-password"
@@ -245,12 +335,17 @@ export default function Signup() {
                 type={showConfirmPassword ? "text" : "password"}
                 autoComplete="new-password"
                 required
-                placeholder="Confirm Password"
+                placeholder="Confirm Password *"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full pl-12 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent outline-none text-gray-700 placeholder-gray-400 transition-all duration-200"
-                onFocus={(e) => e.target.style.boxShadow = '0 0 0 2px #003479'}
-                onBlur={(e) => e.target.style.boxShadow = 'none'}
+                className={`w-full pl-12 pr-12 py-3 border rounded-lg focus:ring-2 focus:border-transparent outline-none text-gray-700 placeholder-gray-400 transition-all duration-200 ${
+                  confirmPasswordError ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                }`}
+                onFocus={(e) => e.target.style.boxShadow = confirmPasswordError ? '0 0 0 2px #ef4444' : '0 0 0 2px #003479'}
+                onBlur={(e) => {
+                  handleBlur('confirmPassword');
+                  e.target.style.boxShadow = 'none';
+                }}
               />
               <button
                 type="button"
@@ -263,25 +358,28 @@ export default function Signup() {
                   <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
                 )}
               </button>
+              {confirmPasswordError && (
+                <p className="mt-1 text-sm text-red-600">{confirmPasswordError}</p>
+              )}
             </div>
 
             {/* Sign Up Button */}
             <button
-              type="button"
-              onClick={handleSubmit}
-              disabled={loading}
-              className="w-full text-white font-bold py-4 px-6 rounded-lg transition-all duration-200 flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl transform hover:scale-105 disabled:transform-none cursor-pointer disabled:cursor-not-allowed"
+              type="submit"
+              disabled={loading || !isFormValid()}
+              className={`w-full text-white font-bold py-4 px-6 rounded-lg transition-all duration-200 flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl transform hover:scale-105 disabled:transform-none cursor-pointer disabled:cursor-not-allowed ${
+                !isFormValid() ? 'opacity-50' : ''
+              }`}
               style={{
-                backgroundColor: loading ? '#6b8cb8' : '#003479',
-                ':hover': { backgroundColor: '#002050' }
+                backgroundColor: loading ? '#6b8cb8' : (isFormValid() ? '#003479' : '#9ca3af'),
               }}
               onMouseEnter={(e) => {
-                if (!loading) {
+                if (!loading && isFormValid()) {
                   e.target.style.backgroundColor = '#002050';
                 }
               }}
               onMouseLeave={(e) => {
-                if (!loading) {
+                if (!loading && isFormValid()) {
                   e.target.style.backgroundColor = '#003479';
                 }
               }}
@@ -289,6 +387,17 @@ export default function Signup() {
               <UserPlus className="h-5 w-5" />
               <span>{loading ? 'Creating account...' : 'SIGN UP'}</span>
             </button>
+          </form>
+
+          {/* Password Requirements */}
+          <div className="mt-4 text-xs text-gray-500">
+            <p className="mb-1">Password must contain:</p>
+            <ul className="list-disc list-inside space-y-1">
+              <li>At least 8 characters</li>
+              <li>One uppercase letter</li>
+              <li>One lowercase letter</li>
+              <li>One number</li>
+            </ul>
           </div>
         </div>
       </div>
