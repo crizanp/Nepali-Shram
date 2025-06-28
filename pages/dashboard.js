@@ -9,13 +9,11 @@ import {
 } from 'lucide-react';
 import ServicesContainer from '@/components/card';
 import Footer from '@/components/footer';
-
 export default function Dashboard() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const router = useRouter();
-
   useEffect(() => {
     async function checkAuthentication() {
       try {
@@ -24,16 +22,13 @@ export default function Dashboard() {
           setLoading(false);
           return;
         }
-
         const token = localStorage.getItem('token');
-
         // If no token exists, redirect to login immediately
         if (!token) {
           console.log('No token found, redirecting to login');
           router.replace('/login');
           return;
         }
-
         // Verify the token with the server
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/me`, {
           method: 'GET',
@@ -44,7 +39,7 @@ export default function Dashboard() {
         });
 
         if (!response.ok) {
-          throw new Error('Token verification failed');
+          throw new Error('Token verification failed2');
         }
 
         const userData = await response.json();
@@ -84,39 +79,7 @@ export default function Dashboard() {
     router.replace('/login');
   };
 
-  const quickActions = [
-    {
-      icon: <User className="h-6 w-6 text-blue-500" />,
-      title: 'Profile',
-      description: 'Manage your account',
-      onClick: () => router.push('/profile')
-    },
-    {
-      icon: <Settings className="h-6 w-6 text-green-500" />,
-      title: 'Settings',
-      description: 'Configure preferences',
-      onClick: () => router.push('/settings')
-    },
-    {
-      icon: <CreditCard className="h-6 w-6 text-purple-500" />,
-      title: 'Billing',
-      description: 'View your subscription',
-      onClick: () => router.push('/billing')
-    }
-  ];
 
-  const recentActivity = [
-    {
-      type: 'Profile Update',
-      date: 'March 1, 2025',
-      description: 'Updated profile information'
-    },
-    {
-      type: 'Password Change',
-      date: 'February 15, 2025',
-      description: 'Changed account password'
-    }
-  ];
 
   // Show loading screen while checking authentication
   if (loading) {

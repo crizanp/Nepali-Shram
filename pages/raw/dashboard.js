@@ -30,7 +30,7 @@ export default function Dashboard() {
             });
             
             if (!response.ok) {
-              throw new Error('Token verification failed');
+              throw new Error('Token verification failed4');
             }
             
             const userData = await response.json();

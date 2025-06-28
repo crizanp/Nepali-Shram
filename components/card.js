@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { 
+import {
   FileText,
   Clock,
   User,
@@ -18,7 +18,8 @@ export default function ServicesContainer() {
       icon: FileText,
       bgColor: 'bg-blue-900',
       iconColor: 'text-blue-600',
-      description: 'Start a new application'
+      description: 'Start a new application',
+      link: 'portal/new-application'
     },
     {
       id: 2,
@@ -26,7 +27,8 @@ export default function ServicesContainer() {
       icon: Clock,
       bgColor: 'bg-blue-900',
       iconColor: 'text-green-600',
-      description: 'Check application status'
+      description: 'Check application status',
+      link: 'portal/status'
     },
     {
       id: 3,
@@ -34,7 +36,8 @@ export default function ServicesContainer() {
       icon: User,
       bgColor: 'bg-blue-900',
       iconColor: 'text-red-600',
-      description: 'Manage your profile'
+      description: 'Manage your profile',
+      link: 'portal/profile'
     },
     {
       id: 4,
@@ -42,7 +45,8 @@ export default function ServicesContainer() {
       icon: BookOpen,
       bgColor: 'bg-blue-900',
       iconColor: 'text-yellow-600',
-      description: 'Learn how to use services'
+      description: 'Learn how to use services',
+      link: 'portal/tutorial'
     },
     {
       id: 5,
@@ -50,7 +54,8 @@ export default function ServicesContainer() {
       icon: Edit,
       bgColor: 'bg-blue-900',
       iconColor: 'text-purple-600',
-      description: 'View or edit applications'
+      description: 'View or edit applications',
+      link: 'portal/edit'
     },
     {
       id: 6,
@@ -58,12 +63,14 @@ export default function ServicesContainer() {
       icon: Settings,
       bgColor: 'bg-blue-900',
       iconColor: 'text-teal-600',
-      description: 'Configure your preferences'
+      description: 'Configure your preferences',
+      link: 'portal/settings'
     }
   ];
-  const handleCardClick = (serviceTitle) => {
-    console.log(`Clicked on: ${serviceTitle}`);
-    // Add your navigation logic here
+
+  const handleCardClick = (service) => {
+    console.log(`Navigating to: ${service.link}`);
+    window.location.href = service.link;
   };
 
   return (
@@ -74,7 +81,7 @@ export default function ServicesContainer() {
           return (
             <div
               key={service.id}
-              onClick={() => handleCardClick(service.title)}
+              onClick={() => handleCardClick(service)}
               onMouseEnter={() => setHoveredCard(service.id)}
               onMouseLeave={() => setHoveredCard(null)}
               className={`
@@ -84,6 +91,14 @@ export default function ServicesContainer() {
                 border border-gray-100
                 ${hoveredCard === service.id ? 'shadow-xl' : 'shadow-sm'}
               `}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  handleCardClick(service);
+                }
+              }}
             >
               <div className="flex flex-col items-center text-center space-y-4">
                 {/* Icon Container */}
@@ -112,8 +127,6 @@ export default function ServicesContainer() {
           );
         })}
       </div>
-      
-     
     </div>
   );
 }

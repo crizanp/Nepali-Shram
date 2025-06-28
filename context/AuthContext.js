@@ -26,7 +26,7 @@ useEffect(() => {
           
           if (!response.ok) {
             // If token verification fails, throw an error to trigger catch block
-            throw new Error('Token verification failed');
+            throw new Error('Token verification failed1');
           }
           
           const userData = await response.json();
