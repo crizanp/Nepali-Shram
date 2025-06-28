@@ -164,6 +164,8 @@ export default function ApplicationForm() {
             isValid = validateStep1();
         } else if (currentStep === 2) {
             isValid = validateStep2();
+        } else if (currentStep === 3) {
+            isValid = true; // No validation needed for review step
         }
 
         if (isValid) {
@@ -235,8 +237,9 @@ export default function ApplicationForm() {
             ${currentStep >= step ? 'text-blue-900 font-bold' : 'text-gray-500'}`}>
                             {step === 1 && 'User Details'}
                             {step === 2 && 'Documents'}
-                            {step === 3 && 'Agreement'}
-                            {step === 4 && 'Submit'}
+                            {step === 3 && 'Review'}
+                            {step === 4 && 'Agreement'}
+                            {step === 5 && 'Submit'}
                         </div>
                     </div>
                 ))}
@@ -378,99 +381,99 @@ export default function ApplicationForm() {
         { name: 'experience_letter', label: 'Experience Letter', accept: '.pdf,.jpg,.jpeg,.png' }
     ], []);
 
-   // Step 2: Document Upload - modified component with view and replace buttons
-const Step2 = useMemo(() => (
-    <div className="space-y-6">
-        <div className="flex items-center mb-6">
-            <Upload className="w-4 h-4 text-blue-500 mr-2" />
-            <h2 className="font-semibold text-gray-900">Document Upload</h2>
-        </div>
+    // Step 2: Document Upload - modified component with view and replace buttons
+    const Step2 = useMemo(() => (
+        <div className="space-y-6">
+            <div className="flex items-center mb-6">
+                <Upload className="w-4 h-4 text-blue-500 mr-2" />
+                <h2 className="font-semibold text-gray-900">Document Upload</h2>
+            </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {documentConfig.map((doc) => (
-                <div key={doc.name} className="relative">
-                    <input
-                        type="file"
-                        name={doc.name}
-                        onChange={handleFileChange}
-                        accept={doc.accept}
-                        className="hidden"
-                        id={doc.name}
-                    />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {documentConfig.map((doc) => (
+                    <div key={doc.name} className="relative">
+                        <input
+                            type="file"
+                            name={doc.name}
+                            onChange={handleFileChange}
+                            accept={doc.accept}
+                            className="hidden"
+                            id={doc.name}
+                        />
 
-                    {formData[doc.name] ? (
-                        // Document uploaded - show as background with buttons below
-                        <div className="relative">
-                            <div className="h-48 rounded-lg overflow-hidden border-2 border-green-300">
-                                {formData[doc.name].type.startsWith('image/') ? (
-                                    // Show image as background
-                                    <img
-                                        src={formData[doc.name].base64}
-                                        alt={doc.label}
-                                        className="w-full h-full object-contain"
-                                    />
-                                ) : formData[doc.name].type === 'application/pdf' ? (
-                                    // Show PDF icon with filename for PDFs
-                                    <div className="w-full h-full bg-red-100 flex flex-col items-center justify-center">
-                                        <FileText className="w-16 h-16 text-red-600 mb-2" />
-                                        <p className="text-sm font-medium text-red-800">{formData[doc.name].name}</p>
-                                        <p className="text-xs text-red-600">PDF Document</p>
+                        {formData[doc.name] ? (
+                            // Document uploaded - show as background with buttons below
+                            <div className="relative">
+                                <div className="h-48 rounded-lg overflow-hidden border-2 border-green-300">
+                                    {formData[doc.name].type.startsWith('image/') ? (
+                                        // Show image as background
+                                        <img
+                                            src={formData[doc.name].base64}
+                                            alt={doc.label}
+                                            className="w-full h-full object-contain"
+                                        />
+                                    ) : formData[doc.name].type === 'application/pdf' ? (
+                                        // Show PDF icon with filename for PDFs
+                                        <div className="w-full h-full bg-red-100 flex flex-col items-center justify-center">
+                                            <FileText className="w-16 h-16 text-red-600 mb-2" />
+                                            <p className="text-sm font-medium text-red-800">{formData[doc.name].name}</p>
+                                            <p className="text-xs text-red-600">PDF Document</p>
+                                        </div>
+                                    ) : (
+                                        // Show generic file icon for other types
+                                        <div className="w-full h-full bg-blue-100 flex flex-col items-center justify-center">
+                                            <FileText className="w-16 h-16 text-blue-600 mb-2" />
+                                            <p className="text-sm font-medium text-blue-800">{formData[doc.name].name}</p>
+                                            <p className="text-xs text-blue-600">{formData[doc.name].type}</p>
+                                        </div>
+                                    )}
+
+                                    {/* Document label at top */}
+                                    <div className="absolute top-2 left-2 bg-white bg-opacity-90 px-2 py-1 rounded text-xs font-medium text-gray-900">
+                                        {doc.label}
                                     </div>
-                                ) : (
-                                    // Show generic file icon for other types
-                                    <div className="w-full h-full bg-blue-100 flex flex-col items-center justify-center">
-                                        <FileText className="w-16 h-16 text-blue-600 mb-2" />
-                                        <p className="text-sm font-medium text-blue-800">{formData[doc.name].name}</p>
-                                        <p className="text-xs text-blue-600">{formData[doc.name].type}</p>
-                                    </div>
-                                )}
 
-                                {/* Document label at top */}
-                                <div className="absolute top-2 left-2 bg-white bg-opacity-90 px-2 py-1 rounded text-xs font-medium text-gray-900">
-                                    {doc.label}
+                                    {/* Remove button at bottom right */}
+                                    <button
+                                        onClick={() => {
+                                            setFormData(prev => ({
+                                                ...prev,
+                                                [doc.name]: null
+                                            }));
+                                        }}
+                                        className="absolute cursor-pointer top-2 right-2 bg-red-600 hover:bg-red-700 text-white p-1.5 rounded-full transition-colors shadow-lg"
+                                        title="Remove document"
+                                    >
+                                        <X className="w-3 h-3" />
+                                    </button>
                                 </div>
 
-                                {/* Remove button at bottom right */}
-                                <button
-                                    onClick={() => {
-                                        setFormData(prev => ({
-                                            ...prev,
-                                            [doc.name]: null
-                                        }));
-                                    }}
-                                    className="absolute cursor-pointer top-2 right-2 bg-red-600 hover:bg-red-700 text-white p-1.5 rounded-full transition-colors shadow-lg"
-                                    title="Remove document"
-                                >
-                                    <X className="w-3 h-3" />
-                                </button>
-                            </div>
-
-                            {/* View and Replace buttons below the card */}
-                            <div className="flex gap-2 mt-3">
-                                <button
-                                    onClick={() => {
-                                        if (formData[doc.name].type === 'application/pdf') {
-                                            // For PDF files, create a blob URL
-                                            try {
-                                                const base64Data = formData[doc.name].base64.split(',')[1];
-                                                const byteCharacters = atob(base64Data);
-                                                const byteNumbers = new Array(byteCharacters.length);
-                                                for (let i = 0; i < byteCharacters.length; i++) {
-                                                    byteNumbers[i] = byteCharacters.charCodeAt(i);
+                                {/* View and Replace buttons below the card */}
+                                <div className="flex gap-2 mt-3">
+                                    <button
+                                        onClick={() => {
+                                            if (formData[doc.name].type === 'application/pdf') {
+                                                // For PDF files, create a blob URL
+                                                try {
+                                                    const base64Data = formData[doc.name].base64.split(',')[1];
+                                                    const byteCharacters = atob(base64Data);
+                                                    const byteNumbers = new Array(byteCharacters.length);
+                                                    for (let i = 0; i < byteCharacters.length; i++) {
+                                                        byteNumbers[i] = byteCharacters.charCodeAt(i);
+                                                    }
+                                                    const byteArray = new Uint8Array(byteNumbers);
+                                                    const blob = new Blob([byteArray], { type: 'application/pdf' });
+                                                    const url = URL.createObjectURL(blob);
+                                                    const newWindow = window.open('', '_blank');
+                                                    newWindow.location.href = url;
+                                                } catch (error) {
+                                                    console.error('Error viewing PDF:', error);
+                                                    alert('Error opening PDF. Please try again.');
                                                 }
-                                                const byteArray = new Uint8Array(byteNumbers);
-                                                const blob = new Blob([byteArray], { type: 'application/pdf' });
-                                                const url = URL.createObjectURL(blob);
+                                            } else {
+                                                // For images, create a new window with the image
                                                 const newWindow = window.open('', '_blank');
-                                                newWindow.location.href = url;
-                                            } catch (error) {
-                                                console.error('Error viewing PDF:', error);
-                                                alert('Error opening PDF. Please try again.');
-                                            }
-                                        } else {
-                                            // For images, create a new window with the image
-                                            const newWindow = window.open('', '_blank');
-                                            newWindow.document.write(`
+                                                newWindow.document.write(`
                                                 <html>
                                                     <head><title>${doc.label}</title></head>
                                                     <body style="margin:0;padding:20px;background:#f0f0f0;display:flex;justify-content:center;align-items:center;min-height:100vh;">
@@ -478,164 +481,304 @@ const Step2 = useMemo(() => (
                                                     </body>
                                                 </html>
                                             `);
-                                            newWindow.document.close();
-                                        }
-                                    }}
-                                    className="flex-1 inline-flex items-center justify-center px-3 py-2 bg-gray-600 cursor-pointer text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
-                                >
-                                    <Eye className="w-4 h-4 mr-2" />
-                                    View
-                                </button>
-                                <label
-                                    htmlFor={doc.name}
-                                    className="flex-1 inline-flex items-center justify-center px-3 py-2 bg-gray-600 text-white rounded-lg text-sm font-medium hover:bg-gray-700 transition-colors cursor-pointer"
-                                >
-                                    <Upload className="w-4 h-4 mr-2" />
-                                    Replace
-                                </label>
+                                                newWindow.document.close();
+                                            }
+                                        }}
+                                        className="flex-1 inline-flex items-center justify-center px-3 py-2 bg-gray-600 cursor-pointer text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+                                    >
+                                        <Eye className="w-4 h-4 mr-2" />
+                                        View
+                                    </button>
+                                    <label
+                                        htmlFor={doc.name}
+                                        className="flex-1 inline-flex items-center justify-center px-3 py-2 bg-gray-600 text-white rounded-lg text-sm font-medium hover:bg-gray-700 transition-colors cursor-pointer"
+                                    >
+                                        <Upload className="w-4 h-4 mr-2" />
+                                        Replace
+                                    </label>
+                                </div>
                             </div>
-                        </div>
-                    ) : (
-                        // No document uploaded - show upload area
-                        <label
-                            htmlFor={doc.name}
-                            className="block border-2 border-dashed border-gray-300 rounded-lg p-6 h-48 text-center hover:border-blue-400 transition-colors cursor-pointer flex flex-col items-center justify-center"
-                        >
-                            <Upload className="w-12 h-12 text-gray-400 mb-4" />
-                            <h3 className="text-lg font-bold text-gray-900 mb-2">{doc.label} *</h3>
-                            <p className="text-sm text-blue-600 font-medium">Click to upload</p>
-                            <p className="text-xs text-gray-500 mt-2">
-                                Supported: PDF, JPG, PNG (Max 5MB)
-                            </p>
-                        </label>
-                    )}
+                        ) : (
+                            // No document uploaded - show upload area
+                            <label
+                                htmlFor={doc.name}
+                                className="block border-2 border-dashed border-gray-300 rounded-lg p-6 h-48 text-center hover:border-blue-400 transition-colors cursor-pointer flex flex-col items-center justify-center"
+                            >
+                                <Upload className="w-12 h-12 text-gray-400 mb-4" />
+                                <h3 className="text-lg font-bold text-gray-900 mb-2">{doc.label} *</h3>
+                                <p className="text-sm text-blue-600 font-medium">Click to upload</p>
+                                <p className="text-xs text-gray-500 mt-2">
+                                    Supported: PDF, JPG, PNG (Max 5MB)
+                                </p>
+                            </label>
+                        )}
 
-                    {errors[doc.name] && (
-                        <p className="text-red-500 text-sm mt-2">{errors[doc.name]}</p>
-                    )}
-                </div>
-            ))}
+                        {errors[doc.name] && (
+                            <p className="text-red-500 text-sm mt-2">{errors[doc.name]}</p>
+                        )}
+                    </div>
+                ))}
+            </div>
         </div>
-    </div>
-), [formData, errors, handleFileChange, documentConfig]);
+    ), [formData, errors, handleFileChange, documentConfig]);
     // Step 3: Agreement - memoized component
-   const Step3 = useMemo(() => (
-    <div className="space-y-6">
-        <div className="flex items-center mb-6">
-            <CheckCircle className="w-6 h-6 text-blue-500 mr-2" />
-            <h2 className="text-xl font-semibold text-gray-900">Terms & Agreement</h2>
-        </div>
+    const Step3 = useMemo(() => (
+        <div className="space-y-6">
+            <div className="flex items-center mb-6">
+                <CheckCircle className="w-6 h-6 text-blue-500 mr-2" />
+                <h2 className="text-xl font-semibold text-gray-900">Terms & Agreement</h2>
+            </div>
 
-        <div className="space-y-4">
-            <div 
-                className="border rounded-lg p-4 cursor-pointer hover:bg-gray-50 transition-colors duration-200"
-                onClick={() => handleInputChange({ 
-                    target: { 
-                        name: 'termsAccepted', 
-                        type: 'checkbox', 
-                        checked: !formData.termsAccepted 
-                    } 
-                })}
-            >
-                <div className="flex items-start">
-                    <div className="flex-shrink-0 mt-1">
-                        <input
-                            type="checkbox"
-                            name="termsAccepted"
-                            checked={formData.termsAccepted}
-                            onChange={() => {}} // Handled by div click
-                            className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded pointer-events-none"
-                        />
+            <div className="space-y-4">
+                <div
+                    className="border rounded-lg p-4 cursor-pointer hover:bg-gray-50 transition-colors duration-200"
+                    onClick={() => handleInputChange({
+                        target: {
+                            name: 'termsAccepted',
+                            type: 'checkbox',
+                            checked: !formData.termsAccepted
+                        }
+                    })}
+                >
+                    <div className="flex items-start">
+                        <div className="flex-shrink-0 mt-1">
+                            <input
+                                type="checkbox"
+                                name="termsAccepted"
+                                checked={formData.termsAccepted}
+                                onChange={() => { }} // Handled by div click
+                                className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded pointer-events-none"
+                            />
+                        </div>
+                        <div className="ml-3 flex-1">
+                            <label className="text-lg font-semibold text-gray-900 cursor-pointer">
+                                Terms and Conditions *
+                            </label>
+                            <p className="text-sm text-gray-700 mt-1">
+                                I agree to the terms and conditions of the Nepali Shram Portal. I understand that providing false information may result in rejection of my application.
+                            </p>
+                        </div>
                     </div>
-                    <div className="ml-3 flex-1">
-                        <label className="text-lg font-semibold text-gray-900 cursor-pointer">
-                            Terms and Conditions *
-                        </label>
-                        <p className="text-sm text-gray-700 mt-1">
-                            I agree to the terms and conditions of the Nepali Shram Portal. I understand that providing false information may result in rejection of my application.
-                        </p>
+                    {errors.termsAccepted && <p className="text-red-500 text-sm mt-2 ml-8">{errors.termsAccepted}</p>}
+                </div>
+
+                <div
+                    className="border rounded-lg p-4 cursor-pointer hover:bg-gray-50 transition-colors duration-200"
+                    onClick={() => handleInputChange({
+                        target: {
+                            name: 'privacyAccepted',
+                            type: 'checkbox',
+                            checked: !formData.privacyAccepted
+                        }
+                    })}
+                >
+                    <div className="flex items-start">
+                        <div className="flex-shrink-0 mt-1">
+                            <input
+                                type="checkbox"
+                                name="privacyAccepted"
+                                checked={formData.privacyAccepted}
+                                onChange={() => { }} // Handled by div click
+                                className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded pointer-events-none"
+                            />
+                        </div>
+                        <div className="ml-3 flex-1">
+                            <label className="text-lg font-semibold text-gray-900 cursor-pointer">
+                                Privacy Policy *
+                            </label>
+                            <p className="text-sm text-gray-700 mt-1">
+                                I consent to the collection, processing, and storage of my personal data in accordance with the privacy policy.
+                            </p>
+                        </div>
+                    </div>
+                    {errors.privacyAccepted && <p className="text-red-500 text-sm mt-2 ml-8">{errors.privacyAccepted}</p>}
+                </div>
+
+                <div
+                    className="border rounded-lg p-4 cursor-pointer hover:bg-gray-50 transition-colors duration-200"
+                    onClick={() => handleInputChange({
+                        target: {
+                            name: 'dataProcessingAccepted',
+                            type: 'checkbox',
+                            checked: !formData.dataProcessingAccepted
+                        }
+                    })}
+                >
+                    <div className="flex items-start">
+                        <div className="flex-shrink-0 mt-1">
+                            <input
+                                type="checkbox"
+                                name="dataProcessingAccepted"
+                                checked={formData.dataProcessingAccepted}
+                                onChange={() => { }} // Handled by div click
+                                className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded pointer-events-none"
+                            />
+                        </div>
+                        <div className="ml-3 flex-1">
+                            <label className="text-lg font-semibold text-gray-900 cursor-pointer">
+                                Agreement *
+                            </label>
+                            <p className="text-sm text-gray-700 mt-1">
+                                I authorize the processing of my data for employment purposes and understand that my information may be shared with relevant authorities and employers.
+                            </p>
+                        </div>
+                    </div>
+                    {errors.dataProcessingAccepted && <p className="text-red-500 text-sm mt-2 ml-8">{errors.dataProcessingAccepted}</p>}
+                </div>
+            </div>
+
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <h3 className="text-sm font-medium text-blue-900 mb-2">Application Summary</h3>
+                <div className="text-sm text-blue-800 space-y-1">
+                    <p>• Personal information completed</p>
+                    <p>• Documents uploaded successfully</p>
+                    <p>• All agreements accepted</p>
+                </div>
+            </div>
+        </div>
+    ), [formData, errors, handleInputChange]);
+    const Step4 = useMemo(() => (
+        <div className="space-y-6">
+            <div className="flex items-center mb-6">
+                <Eye className="w-6 h-6 text-blue-500 mr-2" />
+                <h2 className="text-xl font-semibold text-gray-900">Review Your Application</h2>
+            </div>
+
+            {/* Personal Information Review */}
+            <div className="bg-gray-50 rounded-lg p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                    <User className="w-5 h-5 mr-2" />
+                    Personal Information
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700">Full Name</label>
+                        <p className="mt-1 text-sm text-gray-900 bg-white p-2 rounded border">{formData.fullName}</p>
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700">Email</label>
+                        <p className="mt-1 text-sm text-gray-900 bg-white p-2 rounded border">{formData.email}</p>
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700">Phone</label>
+                        <p className="mt-1 text-sm text-gray-900 bg-white p-2 rounded border">{formData.phone}</p>
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700">Date of Birth</label>
+                        <p className="mt-1 text-sm text-gray-900 bg-white p-2 rounded border">{formData.dateOfBirth}</p>
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700">Nationality</label>
+                        <p className="mt-1 text-sm text-gray-900 bg-white p-2 rounded border">{formData.nationality}</p>
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700">Passport Number</label>
+                        <p className="mt-1 text-sm text-gray-900 bg-white p-2 rounded border">{formData.passportNumber}</p>
+                    </div>
+                    <div className="md:col-span-2">
+                        <label className="block text-sm font-medium text-gray-700">Address</label>
+                        <p className="mt-1 text-sm text-gray-900 bg-white p-2 rounded border">{formData.address}</p>
+                    </div>
+                    <div className="md:col-span-2">
+                        <label className="block text-sm font-medium text-gray-700">Work Experience</label>
+                        <p className="mt-1 text-sm text-gray-900 bg-white p-2 rounded border whitespace-pre-wrap">{formData.experience}</p>
                     </div>
                 </div>
-                {errors.termsAccepted && <p className="text-red-500 text-sm mt-2 ml-8">{errors.termsAccepted}</p>}
             </div>
 
-            <div 
-                className="border rounded-lg p-4 cursor-pointer hover:bg-gray-50 transition-colors duration-200"
-                onClick={() => handleInputChange({ 
-                    target: { 
-                        name: 'privacyAccepted', 
-                        type: 'checkbox', 
-                        checked: !formData.privacyAccepted 
-                    } 
-                })}
-            >
-                <div className="flex items-start">
-                    <div className="flex-shrink-0 mt-1">
-                        <input
-                            type="checkbox"
-                            name="privacyAccepted"
-                            checked={formData.privacyAccepted}
-                            onChange={() => {}} // Handled by div click
-                            className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded pointer-events-none"
-                        />
-                    </div>
-                    <div className="ml-3 flex-1">
-                        <label className="text-lg font-semibold text-gray-900 cursor-pointer">
-                            Privacy Policy *
-                        </label>
-                        <p className="text-sm text-gray-700 mt-1">
-                            I consent to the collection, processing, and storage of my personal data in accordance with the privacy policy.
-                        </p>
-                    </div>
+            {/* Documents Review */}
+            <div className="bg-gray-50 rounded-lg p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                    <FileText className="w-5 h-5 mr-2" />
+                    Uploaded Documents
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {documentConfig.map((doc) => (
+                        <div key={doc.name} className="bg-white p-4 rounded border">
+                            <div className="flex items-center justify-between mb-2">
+                                <h4 className="text-sm font-medium text-gray-900">{doc.label}</h4>
+                                {formData[doc.name] ? (
+                                    <CheckCircle className="w-5 h-5 text-green-500" />
+                                ) : (
+                                    <X className="w-5 h-5 text-red-500" />
+                                )}
+                            </div>
+                            {formData[doc.name] ? (
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm text-gray-600">{formData[doc.name].name}</p>
+                                        <p className="text-xs text-gray-500">
+                                            {(formData[doc.name].size / 1024 / 1024).toFixed(2)} MB
+                                        </p>
+                                    </div>
+                                    <button
+                                        onClick={() => {
+                                            if (formData[doc.name].type === 'application/pdf') {
+                                                try {
+                                                    const base64Data = formData[doc.name].base64.split(',')[1];
+                                                    const byteCharacters = atob(base64Data);
+                                                    const byteNumbers = new Array(byteCharacters.length);
+                                                    for (let i = 0; i < byteCharacters.length; i++) {
+                                                        byteNumbers[i] = byteCharacters.charCodeAt(i);
+                                                    }
+                                                    const byteArray = new Uint8Array(byteNumbers);
+                                                    const blob = new Blob([byteArray], { type: 'application/pdf' });
+                                                    const url = URL.createObjectURL(blob);
+                                                    const newWindow = window.open('', '_blank');
+                                                    newWindow.location.href = url;
+                                                } catch (error) {
+                                                    console.error('Error viewing PDF:', error);
+                                                    alert('Error opening PDF. Please try again.');
+                                                }
+                                            } else {
+                                                const newWindow = window.open('', '_blank');
+                                                newWindow.document.write(`
+                                                <html>
+                                                    <head><title>${doc.label}</title></head>
+                                                    <body style="margin:0;padding:20px;background:#f0f0f0;display:flex;justify-content:center;align-items:center;min-height:100vh;">
+                                                        <img src="${formData[doc.name].base64}" style="max-width:90vw;max-height:90vh;object-fit:contain;box-shadow:0 4px 8px rgba(0,0,0,0.1);" alt="${doc.label}" />
+                                                    </body>
+                                                </html>
+                                            `);
+                                                newWindow.document.close();
+                                            }
+                                        }}
+                                        className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                                    >
+                                        View
+                                    </button>
+                                </div>
+                            ) : (
+                                <p className="text-sm text-red-600">Not uploaded</p>
+                            )}
+                        </div>
+                    ))}
                 </div>
-                {errors.privacyAccepted && <p className="text-red-500 text-sm mt-2 ml-8">{errors.privacyAccepted}</p>}
             </div>
 
-            <div 
-                className="border rounded-lg p-4 cursor-pointer hover:bg-gray-50 transition-colors duration-200"
-                onClick={() => handleInputChange({ 
-                    target: { 
-                        name: 'dataProcessingAccepted', 
-                        type: 'checkbox', 
-                        checked: !formData.dataProcessingAccepted 
-                    } 
-                })}
-            >
-                <div className="flex items-start">
-                    <div className="flex-shrink-0 mt-1">
-                        <input
-                            type="checkbox"
-                            name="dataProcessingAccepted"
-                            checked={formData.dataProcessingAccepted}
-                            onChange={() => {}} // Handled by div click
-                            className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded pointer-events-none"
-                        />
-                    </div>
-                    <div className="ml-3 flex-1">
-                        <label className="text-lg font-semibold text-gray-900 cursor-pointer">
-                            Agreement *
-                        </label>
-                        <p className="text-sm text-gray-700 mt-1">
-                            I authorize the processing of my data for employment purposes and understand that my information may be shared with relevant authorities and employers.
-                        </p>
-                    </div>
+            {/* Edit Options */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <h3 className="text-sm font-medium text-blue-900 mb-2">Need to make changes?</h3>
+                <div className="flex gap-2">
+                    <button
+                        onClick={() => setCurrentStep(1)}
+                        className="text-blue-600 hover:text-blue-800 text-sm font-medium underline"
+                    >
+                        Edit Personal Information
+                    </button>
+                    <span className="text-blue-600">•</span>
+                    <button
+                        onClick={() => setCurrentStep(2)}
+                        className="text-blue-600 hover:text-blue-800 text-sm font-medium underline"
+                    >
+                        Edit Documents
+                    </button>
                 </div>
-                {errors.dataProcessingAccepted && <p className="text-red-500 text-sm mt-2 ml-8">{errors.dataProcessingAccepted}</p>}
             </div>
         </div>
-
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <h3 className="text-sm font-medium text-blue-900 mb-2">Application Summary</h3>
-            <div className="text-sm text-blue-800 space-y-1">
-                <p>• Personal information completed</p>
-                <p>• Documents uploaded successfully</p>
-                <p>• All agreements accepted</p>
-            </div>
-        </div>
-    </div>
-), [formData, errors, handleInputChange]);
-
+    ), [formData, documentConfig]);
     return (
+        <>
         <div className="min-h-screen bg-red-50 py-8">
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="bg-white rounded-lg p-8">
@@ -649,7 +792,8 @@ const Step2 = useMemo(() => (
                     <div className="mb-8">
                         {currentStep === 1 && Step1}
                         {currentStep === 2 && Step2}
-                        {currentStep === 3 && Step3}
+                        {currentStep === 3 && Step4}
+                        {currentStep === 4 && Step3}
                     </div>
 
                     {/* Navigation Buttons */}
@@ -665,8 +809,7 @@ const Step2 = useMemo(() => (
                             <ArrowLeft className="w-4 h-4 mr-2" />
                             Previous
                         </button>
-
-                        {currentStep < 3 ? (
+                        {currentStep < 4 ? (
                             <button
                                 onClick={handleNext}
                                 className="inline-flex items-center cursor-pointer px-4 py-2 border border-transparent rounded-md text-lg font-medium text-white bg-blue-900 hover:bg-blue-700"
@@ -686,6 +829,6 @@ const Step2 = useMemo(() => (
                     </div>
                 </div>
             </div>
-        </div>
+        </div></>
     );
 }
