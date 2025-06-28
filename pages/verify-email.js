@@ -159,7 +159,6 @@ export default function VerifyEmail() {
         return (
           <div>
             <div className="text-center mb-6">
-              <Mail className="h-16 w-16 mx-auto mb-4" style={{ color: '#003479' }} />
               <h2 className="text-2xl font-bold mb-2" style={{ color: '#003479' }}>VERIFY YOUR EMAIL</h2>
               <p className="text-gray-600">
                 Enter your email address to receive a new verification link.
