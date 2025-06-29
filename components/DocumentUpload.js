@@ -4,10 +4,17 @@ import { Upload, FileText, X, Eye } from 'lucide-react';
 
 const DocumentUpload = ({ formData, errors, onFileChange, onRemoveFile }) => {
     const documentConfig = [
-        { name: 'passport', label: 'Passport Copy', accept: '.pdf,.jpg,.jpeg,.png' },
-        { name: 'photo', label: 'Passport Size Photo', accept: '.jpg,.jpeg,.png' },
-        { name: 'certificate', label: 'Educational Certificate', accept: '.pdf,.jpg,.jpeg,.png' },
-        { name: 'experience_letter', label: 'Experience Letter', accept: '.pdf,.jpg,.jpeg,.png' }
+        { name: 'passport', label: 'Passport Front', accept: '.pdf,.jpg,.jpeg,.png' },
+        { name: 'passport', label: 'Passport back (If MRP passport not needed)', accept: '.pdf,.jpg,.jpeg,.png' },
+        { name: 'visa', label: 'Valid Visa', accept: '.pdf,.jpg,.jpeg,.png' },
+        { name: 'visad', label: 'Previous Visa', accept: '.pdf,.jpg,.jpeg,.png' },
+                { name: 'arrival', label: 'Labor Visa card(front)', accept: '.pdf,.jpg,.jpeg,.png' },
+                { name: 'arrival', label: 'Labor Visa card(back)', accept: '.pdf,.jpg,.jpeg,.png' },
+                { name: 'arrival', label: 'Arrival', accept: '.pdf,.jpg,.jpeg,.png' },
+                { name: 'arrival', label: 'Departure', accept: '.pdf,.jpg,.jpeg,.png' },
+                { name: 'arrival', label: 'Agreement Paper', accept: '.pdf,.jpg,.jpeg,.png' },
+                { name: 'arrival', label: 'Further Info', accept: '.pdf,.jpg,.jpeg,.png' },
+
     ];
 
     const handleViewDocument = (document, label) => {

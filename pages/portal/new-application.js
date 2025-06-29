@@ -108,93 +108,110 @@ export default function ApplicationForm() {
     }, []);
 
     // File handling functions
-    const handleFileChange = useCallback(async (e) => {
-        const file = e.target.files[0];
-        const fieldName = e.target.name;
-        
-        if (!file) return;
-        
-        // Clear any existing error for this field
+    // Enhanced file handling function for your React component
+const handleFileChange = useCallback(async (e) => {
+    const file = e.target.files[0];
+    const fieldName = e.target.name;
+    
+    if (!file) return;
+    
+    // Clear any existing error for this field
+    setErrors(prev => ({
+        ...prev,
+        [fieldName]: null
+    }));
+    
+    // Validate file size (10MB limit for documents, 5MB for photos)
+    const maxSize = fieldName === 'photo' ? 5 * 1024 * 1024 : 10 * 1024 * 1024;
+    if (file.size > maxSize) {
         setErrors(prev => ({
             ...prev,
-            [fieldName]: null
+            [fieldName]: `File size must be less than ${fieldName === 'photo' ? '5MB' : '10MB'}`
         }));
+        return;
+    }
+    
+    // Validate file type based on document type
+    let allowedTypes = [];
+    if (fieldName === 'photo') {
+        allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+    } else {
+        allowedTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
+    }
+    
+    if (!allowedTypes.includes(file.type)) {
+        const typeText = fieldName === 'photo' ? 'JPG or PNG' : 'PDF, JPG, or PNG';
+        setErrors(prev => ({
+            ...prev,
+            [fieldName]: `Please upload a ${typeText} file`
+        }));
+        return;
+    }
+    
+    try {
+        // Convert file to base64
+        const base64 = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = () => reject(new Error('Failed to read file'));
+            reader.readAsDataURL(file);
+        });
         
-        // Validate file size (5MB limit)
-        if (file.size > 5 * 1024 * 1024) {
-            setErrors(prev => ({
-                ...prev,
-                [fieldName]: 'File size must be less than 5MB'
-            }));
-            return;
-        }
-        
-        // Validate file type
-        const allowedTypes = [
-            'application/pdf',
-            'image/jpeg',
-            'image/jpg', 
-            'image/png'
-        ];
-        
-        if (!allowedTypes.includes(file.type)) {
-            setErrors(prev => ({
-                ...prev,
-                [fieldName]: 'Please upload a PDF, JPG, or PNG file'
-            }));
-            return;
-        }
-        
-        try {
-            // Convert file to base64
-            const base64 = await new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = () => resolve(reader.result);
-                reader.onerror = () => reject(new Error('Failed to read file'));
-                reader.readAsDataURL(file);
-            });
-            
-            // Update form data with file information
-            setFormData(prev => ({
-                ...prev,
-                [fieldName]: {
-                    name: file.name,
-                    type: file.type,
-                    size: file.size,
-                    base64: base64,
-                    lastModified: file.lastModified
-                }
-            }));
-            
-            console.log(`File uploaded for ${fieldName}:`, {
-                name: file.name,
-                type: file.type,
-                size: file.size
-            });
-            
-        } catch (error) {
-            console.error('Error processing file:', error);
-            setErrors(prev => ({
-                ...prev,
-                [fieldName]: 'Error processing file. Please try again.'
-            }));
-        }
-    }, []);
-
-    const handleRemoveFile = useCallback((fieldName) => {
+        // Update form data with file information
         setFormData(prev => ({
             ...prev,
-            [fieldName]: null
+            [fieldName]: {
+                name: file.name,
+                type: file.type,
+                size: file.size,
+                base64: base64,
+                lastModified: file.lastModified,
+                // Add preview URL for images
+                previewUrl: file.type.startsWith('image/') ? URL.createObjectURL(file) : null
+            }
         }));
         
-        // Clear any errors for this field
+        console.log(`File uploaded for ${fieldName}:`, {
+            name: file.name,
+            type: file.type,
+            size: `${(file.size / 1024 / 1024).toFixed(2)} MB`
+        });
+        
+    } catch (error) {
+        console.error('Error processing file:', error);
         setErrors(prev => ({
             ...prev,
-            [fieldName]: null
+            [fieldName]: 'Error processing file. Please try again.'
         }));
-        
-        console.log(`File removed for ${fieldName}`);
-    }, []);
+    }
+}, []);
+
+// Enhanced file removal function
+const handleRemoveFile = useCallback((fieldName) => {
+    // Clean up preview URL if it exists
+    if (formData[fieldName]?.previewUrl) {
+        URL.revokeObjectURL(formData[fieldName].previewUrl);
+    }
+    
+    setFormData(prev => ({
+        ...prev,
+        [fieldName]: null
+    }));
+    
+    // Clear any errors for this field
+    setErrors(prev => ({
+        ...prev,
+        [fieldName]: null
+    }));
+    
+    // Clear the file input
+    const fileInput = document.querySelector(`input[name="${fieldName}"]`);
+    if (fileInput) {
+        fileInput.value = '';
+    }
+    
+    console.log(`File removed for ${fieldName}`);
+}, [formData]);
 
     // Validation functions
     const validateStep1 = useCallback(() => {
@@ -266,101 +283,102 @@ export default function ApplicationForm() {
     }, []);
 
     // Form submission
-    const handleSubmit = useCallback(async () => {
-        if (!validateStep3()) {
-            return;
+   // Updated handleSubmit function in your React component
+const handleSubmit = useCallback(async () => {
+    if (!validateStep3()) {
+        return;
+    }
+
+    setSubmitting(true);
+    
+    try {
+        const submissionData = {
+            // Basic form data
+            fullName: formData.fullName,
+            email: formData.email,
+            phone: formData.phone,
+            address: formData.address,
+            dateOfBirth: formData.dateOfBirth,
+            nationality: formData.nationality,
+            passportNumber: formData.passportNumber,
+            experience: formData.experience,
+            
+            // Agreement data
+            termsAccepted: formData.termsAccepted,
+            privacyAccepted: formData.privacyAccepted,
+            dataProcessingAccepted: formData.dataProcessingAccepted,
+            
+            // Document data - Send complete document objects
+            documents: {
+                passport: formData.passport?.base64 || null,
+                photo: formData.photo?.base64 || null,
+                certificate: formData.certificate?.base64 || null,
+                experience_letter: formData.experience_letter?.base64 || null
+            },
+            
+            // Metadata
+            userAgent: navigator.userAgent
+        };
+
+        console.log('Submitting application with data:', {
+            ...submissionData,
+            documents: Object.keys(submissionData.documents).reduce((acc, key) => {
+                acc[key] = submissionData.documents[key] ? 'base64_data_present' : null;
+                return acc;
+            }, {})
+        });
+
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/applications`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(submissionData)
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || `Submission failed: ${response.statusText}`);
         }
 
-        setSubmitting(true);
-        
-        try {
-            const submissionData = {
-                // Basic form data
-                fullName: formData.fullName,
-                email: formData.email,
-                phone: formData.phone,
-                address: formData.address,
-                dateOfBirth: formData.dateOfBirth,
-                nationality: formData.nationality,
-                passportNumber: formData.passportNumber,
-                experience: formData.experience,
-                
-                // Agreement data
-                termsAccepted: formData.termsAccepted,
-                privacyAccepted: formData.privacyAccepted,
-                dataProcessingAccepted: formData.dataProcessingAccepted,
-                
-                // Document data (base64 encoded)
-                documents: {
-                    passport: formData.passport?.base64,
-                    photo: formData.photo?.base64,
-                    certificate: formData.certificate?.base64,
-                    experience_letter: formData.experience_letter?.base64
-                },
-                
-                // Metadata
-                submittedAt: new Date().toISOString(),
-                userAgent: navigator.userAgent
-            };
+        const result = await response.json();
+        console.log('Application submitted successfully:', result);
 
-            console.log('Submitting application with data:', {
-                ...submissionData,
-                documents: Object.keys(submissionData.documents).reduce((acc, key) => {
-                    acc[key] = submissionData.documents[key] ? 'base64_data_present' : null;
-                    return acc;
-                }, {})
-            });
+        // Show success message with application number
+        alert(`Application submitted successfully! Your application number is: ${result.applicationNumber}. You will receive a confirmation email shortly.`);
 
-            // Simulate API call - replace with actual API endpoint
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/applications`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(submissionData)
-            });
+        // Reset form
+        setFormData({
+            fullName: '',
+            email: '',
+            phone: '',
+            address: '',
+            dateOfBirth: '',
+            nationality: '',
+            passportNumber: '',
+            experience: '',
+            passport: null,
+            photo: null,
+            certificate: null,
+            experience_letter: null,
+            termsAccepted: false,
+            privacyAccepted: false,
+            dataProcessingAccepted: false
+        });
+        setCurrentStep(1);
+        setErrors({});
 
-            if (!response.ok) {
-                throw new Error(`Submission failed: ${response.statusText}`);
-            }
+        // Redirect to applications page or success page
+        router.push('/applications');
 
-            const result = await response.json();
-            console.log('Application submitted successfully:', result);
-
-            alert('Application submitted successfully! You will receive a confirmation email shortly.');
-
-            // Reset form
-            setFormData({
-                fullName: '',
-                email: '',
-                phone: '',
-                address: '',
-                dateOfBirth: '',
-                nationality: '',
-                passportNumber: '',
-                experience: '',
-                passport: null,
-                photo: null,
-                certificate: null,
-                experience_letter: null,
-                termsAccepted: false,
-                privacyAccepted: false,
-                dataProcessingAccepted: false
-            });
-            setCurrentStep(1);
-            setErrors({});
-
-            // Redirect to success page or dashboard
-            // router.push('/applications/success');
-
-        } catch (error) {
-            console.error('Submission error:', error);
-            alert('Error submitting application. Please check your connection and try again.');
-        } finally {
-            setSubmitting(false);
-        }
-    }, [validateStep3, formData, router]);
+    } catch (error) {
+        console.error('Submission error:', error);
+        alert(`Error submitting application: ${error.message}. Please check your connection and try again.`);
+    } finally {
+        setSubmitting(false);
+    }
+}, [validateStep3, formData, router]);
 
     // Step navigation from review
     const goToStep = useCallback((step) => {
