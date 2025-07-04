@@ -133,7 +133,7 @@ export default function Login() {
               <div className="mb-3">
                 <strong>Email Verification Required</strong>
                 <p className="text-sm mt-1">
-                  Please verify your email address before signing in. We've sent a verification link to <strong>{unverifiedEmail}</strong>.
+                  Please verify your email address before signing in. We have sent a verification link to <strong>{unverifiedEmail}</strong>.
                 </p>
               </div>
               <button
