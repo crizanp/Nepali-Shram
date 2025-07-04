@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
-import Navbar from '../components/navbar'; // Import the new Navbar component
+import Navbar from '../../components/navbar'; // Import the new Navbar component
 import { 
   User, 
   Settings, 
