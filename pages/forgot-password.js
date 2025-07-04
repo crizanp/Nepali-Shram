@@ -67,7 +67,7 @@ export default function ForgotPassword() {
           <div className="text-center my-8">
             <h2 className="text-2xl font-bold mb-1" style={{ color: '#003479' }}>FORGOT PASSWORD</h2>
             <p className="text-sm text-gray-600">
-              Enter your email and we'll send you a link to reset your password.
+              Enter your email and we will send you a link to reset your password.
             </p>
           </div>
 

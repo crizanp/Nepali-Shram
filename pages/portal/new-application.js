@@ -19,27 +19,33 @@ export default function ApplicationForm() {
 
     // Form data state
     const [formData, setFormData] = useState({
-        // Step 1: User Details
-        fullName: '',
-        email: '',
-        phone: '',
-        address: '',
-        dateOfBirth: '',
-        nationality: '',
-        passportNumber: '',
-        experience: '',
+    // Step 1: User Details
+    fullName: '',
+    email: '',
+    phone: '',
+    address: '',
+    dateOfBirth: '',
+    nationality: '',
+    passportNumber: '',
+    experience: '',
 
-        // Step 2: Documents
-        passport: null,
-        photo: null,
-        certificate: null,
-        experience_letter: null,
+    // Step 2: Documents - Updated to match DocumentUpload component
+    passport: null,
+    passportBack: null,
+    visa: null,
+    visad: null,
+    laborVisaFront: null,
+    laborVisaBack: null,
+    arrival: null,
+    departure: null,
+    agreementPaper: null,
+    furtherInfo: null,
 
-        // Step 3: Agreement
-        termsAccepted: false,
-        privacyAccepted: false,
-        dataProcessingAccepted: false
-    });
+    // Step 3: Agreement
+    termsAccepted: false,
+    privacyAccepted: false,
+    dataProcessingAccepted: false
+});
 
     const [errors, setErrors] = useState({});
 
@@ -109,6 +115,7 @@ export default function ApplicationForm() {
 
     // File handling functions
     // Enhanced file handling function for your React component
+// Updated file handling functions for Cloudinary upload
 const handleFileChange = useCallback(async (e) => {
     const file = e.target.files[0];
     const fieldName = e.target.name;
@@ -121,76 +128,122 @@ const handleFileChange = useCallback(async (e) => {
         [fieldName]: null
     }));
     
-    // Validate file size (10MB limit for documents, 5MB for photos)
-    const maxSize = fieldName === 'photo' ? 5 * 1024 * 1024 : 10 * 1024 * 1024;
+    // Validate file size (10MB limit)
+    const maxSize = 10 * 1024 * 1024;
     if (file.size > maxSize) {
         setErrors(prev => ({
             ...prev,
-            [fieldName]: `File size must be less than ${fieldName === 'photo' ? '5MB' : '10MB'}`
+            [fieldName]: `File size must be less than 10MB`
         }));
         return;
     }
     
-    // Validate file type based on document type
-    let allowedTypes = [];
-    if (fieldName === 'photo') {
-        allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
-    } else {
-        allowedTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
-    }
-    
+    // Validate file type
+    const allowedTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
     if (!allowedTypes.includes(file.type)) {
-        const typeText = fieldName === 'photo' ? 'JPG or PNG' : 'PDF, JPG, or PNG';
         setErrors(prev => ({
             ...prev,
-            [fieldName]: `Please upload a ${typeText} file`
+            [fieldName]: `Please upload a PDF, JPG, or PNG file`
         }));
         return;
     }
     
     try {
-        // Convert file to base64
-        const base64 = await new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => resolve(reader.result);
-            reader.onerror = () => reject(new Error('Failed to read file'));
-            reader.readAsDataURL(file);
-        });
-        
-        // Update form data with file information
+        // Show loading state
         setFormData(prev => ({
             ...prev,
             [fieldName]: {
                 name: file.name,
                 type: file.type,
                 size: file.size,
-                base64: base64,
-                lastModified: file.lastModified,
-                // Add preview URL for images
+                uploading: true,
                 previewUrl: file.type.startsWith('image/') ? URL.createObjectURL(file) : null
+            }
+        }));
+
+        // Create FormData for file upload
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('upload_preset', process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET);
+        formData.append('folder', `applications/${user.id}`);
+
+        // Upload to Cloudinary
+        const response = await fetch(
+            `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/upload`,
+            {
+                method: 'POST',
+                body: formData
+            }
+        );
+
+        if (!response.ok) {
+            throw new Error('Upload failed');
+        }
+
+        const result = await response.json();
+        
+        // Update form data with Cloudinary response
+        setFormData(prev => ({
+            ...prev,
+            [fieldName]: {
+                name: file.name,
+                type: file.type,
+                size: file.size,
+                url: result.secure_url,
+                publicId: result.public_id,
+                format: result.format,
+                bytes: result.bytes,
+                uploading: false,
+                previewUrl: file.type.startsWith('image/') ? result.secure_url : null
             }
         }));
         
         console.log(`File uploaded for ${fieldName}:`, {
             name: file.name,
             type: file.type,
-            size: `${(file.size / 1024 / 1024).toFixed(2)} MB`
+            size: `${(file.size / 1024 / 1024).toFixed(2)} MB`,
+            url: result.secure_url
         });
         
     } catch (error) {
-        console.error('Error processing file:', error);
+        console.error('Error uploading file:', error);
         setErrors(prev => ({
             ...prev,
-            [fieldName]: 'Error processing file. Please try again.'
+            [fieldName]: 'Error uploading file. Please try again.'
+        }));
+        
+        // Clear the failed upload
+        setFormData(prev => ({
+            ...prev,
+            [fieldName]: null
         }));
     }
-}, []);
+}, [user.id]);
 
-// Enhanced file removal function
-const handleRemoveFile = useCallback((fieldName) => {
+// Updated file removal function
+const handleRemoveFile = useCallback(async (fieldName) => {
+    const fileData = formData[fieldName];
+    
     // Clean up preview URL if it exists
-    if (formData[fieldName]?.previewUrl) {
-        URL.revokeObjectURL(formData[fieldName].previewUrl);
+    if (fileData?.previewUrl && fileData.previewUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(fileData.previewUrl);
+    }
+    
+    // If file was uploaded to Cloudinary, delete it
+    if (fileData?.publicId) {
+        try {
+            // Call your backend API to delete from Cloudinary
+            await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/upload/delete`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ publicId: fileData.publicId })
+            });
+        } catch (error) {
+            console.error('Error deleting file from Cloudinary:', error);
+        }
     }
     
     setFormData(prev => ({
@@ -234,17 +287,30 @@ const handleRemoveFile = useCallback((fieldName) => {
         return Object.keys(newErrors).length === 0;
     }, [formData]);
 
-    const validateStep2 = useCallback(() => {
-        const newErrors = {};
+   // Updated validation function for Step 2
+const validateStep2 = useCallback(() => {
+    const newErrors = {};
 
-        if (!formData.passport) newErrors.passport = 'Passport copy is required';
-        if (!formData.photo) newErrors.photo = 'Photo is required';
-        if (!formData.certificate) newErrors.certificate = 'Certificate is required';
-        if (!formData.experience_letter) newErrors.experience_letter = 'Experience letter is required';
+    // Required documents
+    const requiredDocs = ['passport', 'visa', 'laborVisaFront', 'laborVisaBack', 'arrival', 'agreementPaper'];
+    
+    requiredDocs.forEach(docName => {
+        if (!formData[docName] || !formData[docName].url) {
+            const docConfig = {
+                passport: 'Passport Front',
+                visa: 'Valid Visa',
+                laborVisaFront: 'Labor Visa card (front)',
+                laborVisaBack: 'Labor Visa card (back)',
+                arrival: 'Arrival document',
+                agreementPaper: 'Agreement Paper'
+            };
+            newErrors[docName] = `${docConfig[docName]} is required`;
+        }
+    });
 
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
-    }, [formData]);
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+}, [formData]);
 
     const validateStep3 = useCallback(() => {
         const newErrors = {};
@@ -284,6 +350,7 @@ const handleRemoveFile = useCallback((fieldName) => {
 
     // Form submission
    // Updated handleSubmit function in your React component
+// Updated handleSubmit function for Cloudinary URLs
 const handleSubmit = useCallback(async () => {
     if (!validateStep3()) {
         return;
@@ -308,12 +375,88 @@ const handleSubmit = useCallback(async () => {
             privacyAccepted: formData.privacyAccepted,
             dataProcessingAccepted: formData.dataProcessingAccepted,
             
-            // Document data - Send complete document objects
+            // Document data - Updated to send Cloudinary URLs and metadata
             documents: {
-                passport: formData.passport?.base64 || null,
-                photo: formData.photo?.base64 || null,
-                certificate: formData.certificate?.base64 || null,
-                experience_letter: formData.experience_letter?.base64 || null
+                passport: formData.passport ? {
+                    url: formData.passport.url,
+                    publicId: formData.passport.publicId,
+                    fileName: formData.passport.name,
+                    fileType: formData.passport.format || formData.passport.type,
+                    fileSize: formData.passport.bytes || formData.passport.size
+                } : null,
+                
+                visa: formData.visa ? {
+                    url: formData.visa.url,
+                    publicId: formData.visa.publicId,
+                    fileName: formData.visa.name,
+                    fileType: formData.visa.format || formData.visa.type,
+                    fileSize: formData.visa.bytes || formData.visa.size
+                } : null,
+                
+                laborVisaFront: formData.laborVisaFront ? {
+                    url: formData.laborVisaFront.url,
+                    publicId: formData.laborVisaFront.publicId,
+                    fileName: formData.laborVisaFront.name,
+                    fileType: formData.laborVisaFront.format || formData.laborVisaFront.type,
+                    fileSize: formData.laborVisaFront.bytes || formData.laborVisaFront.size
+                } : null,
+                
+                laborVisaBack: formData.laborVisaBack ? {
+                    url: formData.laborVisaBack.url,
+                    publicId: formData.laborVisaBack.publicId,
+                    fileName: formData.laborVisaBack.name,
+                    fileType: formData.laborVisaBack.format || formData.laborVisaBack.type,
+                    fileSize: formData.laborVisaBack.bytes || formData.laborVisaBack.size
+                } : null,
+                
+                arrival: formData.arrival ? {
+                    url: formData.arrival.url,
+                    publicId: formData.arrival.publicId,
+                    fileName: formData.arrival.name,
+                    fileType: formData.arrival.format || formData.arrival.type,
+                    fileSize: formData.arrival.bytes || formData.arrival.size
+                } : null,
+                
+                agreementPaper: formData.agreementPaper ? {
+                    url: formData.agreementPaper.url,
+                    publicId: formData.agreementPaper.publicId,
+                    fileName: formData.agreementPaper.name,
+                    fileType: formData.agreementPaper.format || formData.agreementPaper.type,
+                    fileSize: formData.agreementPaper.bytes || formData.agreementPaper.size
+                } : null,
+                
+                // Optional documents
+                passportBack: formData.passportBack ? {
+                    url: formData.passportBack.url,
+                    publicId: formData.passportBack.publicId,
+                    fileName: formData.passportBack.name,
+                    fileType: formData.passportBack.format || formData.passportBack.type,
+                    fileSize: formData.passportBack.bytes || formData.passportBack.size
+                } : null,
+                
+                visad: formData.visad ? {
+                    url: formData.visad.url,
+                    publicId: formData.visad.publicId,
+                    fileName: formData.visad.name,
+                    fileType: formData.visad.format || formData.visad.type,
+                    fileSize: formData.visad.bytes || formData.visad.size
+                } : null,
+                
+                departure: formData.departure ? {
+                    url: formData.departure.url,
+                    publicId: formData.departure.publicId,
+                    fileName: formData.departure.name,
+                    fileType: formData.departure.format || formData.departure.type,
+                    fileSize: formData.departure.bytes || formData.departure.size
+                } : null,
+                
+                furtherInfo: formData.furtherInfo ? {
+                    url: formData.furtherInfo.url,
+                    publicId: formData.furtherInfo.publicId,
+                    fileName: formData.furtherInfo.name,
+                    fileType: formData.furtherInfo.format || formData.furtherInfo.type,
+                    fileSize: formData.furtherInfo.bytes || formData.furtherInfo.size
+                } : null
             },
             
             // Metadata
@@ -323,7 +466,7 @@ const handleSubmit = useCallback(async () => {
         console.log('Submitting application with data:', {
             ...submissionData,
             documents: Object.keys(submissionData.documents).reduce((acc, key) => {
-                acc[key] = submissionData.documents[key] ? 'base64_data_present' : null;
+                acc[key] = submissionData.documents[key] ? 'file_data_present' : null;
                 return acc;
             }, {})
         });
@@ -359,9 +502,15 @@ const handleSubmit = useCallback(async () => {
             passportNumber: '',
             experience: '',
             passport: null,
-            photo: null,
-            certificate: null,
-            experience_letter: null,
+            passportBack: null,
+            visa: null,
+            visad: null,
+            laborVisaFront: null,
+            laborVisaBack: null,
+            arrival: null,
+            departure: null,
+            agreementPaper: null,
+            furtherInfo: null,
             termsAccepted: false,
             privacyAccepted: false,
             dataProcessingAccepted: false
@@ -369,7 +518,7 @@ const handleSubmit = useCallback(async () => {
         setCurrentStep(1);
         setErrors({});
 
-        // Redirect to applications page or success page
+        // Redirect to applications page
         router.push('/applications');
 
     } catch (error) {
@@ -379,7 +528,6 @@ const handleSubmit = useCallback(async () => {
         setSubmitting(false);
     }
 }, [validateStep3, formData, router]);
-
     // Step navigation from review
     const goToStep = useCallback((step) => {
         setCurrentStep(step);

@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
-import { authApi } from '../utils/api'; 
+import { authApi } from '../utils/api';
 import { Eye, EyeOff, Lock, UserPlus, Mail, User } from 'lucide-react';
 
 export default function Signup() {
@@ -62,14 +62,14 @@ export default function Signup() {
 
   // Check if form is valid
   const isFormValid = () => {
-    return !validateName(name) && 
-           !validateEmail(email) && 
-           !validatePassword(password) && 
-           !validateConfirmPassword(confirmPassword, password) &&
-           name.trim() && 
-           email.trim() && 
-           password && 
-           confirmPassword;
+    return !validateName(name) &&
+      !validateEmail(email) &&
+      !validatePassword(password) &&
+      !validateConfirmPassword(confirmPassword, password) &&
+      name.trim() &&
+      email.trim() &&
+      password &&
+      confirmPassword;
   };
 
   const handleBlur = (field) => {
@@ -78,7 +78,7 @@ export default function Signup() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Mark all fields as touched to show validation errors
     setTouched({
       name: true,
@@ -150,13 +150,13 @@ export default function Signup() {
             <div className="text-center my-8">
               <h2 className="text-2xl font-bold mb-1" style={{ color: '#003479' }}>VERIFY YOUR EMAIL</h2>
               <p className="text-sm text-gray-600 mb-4">
-                We've sent a verification link to <strong>{email}</strong>. 
+                We have sent a verification link to <strong>{email}</strong>.
                 Please check your inbox and click the link to verify your account.
               </p>
               <p className="text-sm text-gray-600">
-                Didn't receive the email?{' '}
-                <button 
-                  onClick={handleSubmit} 
+                Did not receive the email?{' '}
+                <button
+                  onClick={handleSubmit}
                   className="font-medium hover:underline cursor-pointer transition-colors duration-200"
                   style={{ color: '#003479' }}
                   disabled={loading}
@@ -214,12 +214,11 @@ export default function Signup() {
             <h2 className="text-2xl font-bold mb-1" style={{ color: '#003479' }}>SIGN UP</h2>
             <p className="text-sm text-gray-600">
               Or{' '}
-              <a href="/login" className="font-medium hover:underline cursor-pointer transition-colors duration-200" style={{ color: '#003479' }}>
-                sign in to your existing account
-              </a>
+              <Link href="/login" className="font-medium hover:underline cursor-pointer transition-colors duration-200" style={{ color: '#003479' }}>
+              sign in to your existing account
+              </Link>
             </p>
           </div>
-
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4" role="alert">
               <span className="block sm:inline">{error}</span>
@@ -243,9 +242,8 @@ export default function Signup() {
                 placeholder="Full Name *"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className={`w-full pl-12 pr-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent outline-none text-gray-700 placeholder-gray-400 transition-all duration-200 ${
-                  nameError ? 'border-red-300 bg-red-50' : 'border-gray-300'
-                }`}
+                className={`w-full pl-12 pr-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent outline-none text-gray-700 placeholder-gray-400 transition-all duration-200 ${nameError ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                  }`}
                 onFocus={(e) => e.target.style.boxShadow = nameError ? '0 0 0 2px #ef4444' : '0 0 0 2px #003479'}
                 onBlur={(e) => {
                   handleBlur('name');
@@ -271,9 +269,8 @@ export default function Signup() {
                 placeholder="Email address *"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className={`w-full pl-12 pr-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent outline-none text-gray-700 placeholder-gray-400 transition-all duration-200 ${
-                  emailError ? 'border-red-300 bg-red-50' : 'border-gray-300'
-                }`}
+                className={`w-full pl-12 pr-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent outline-none text-gray-700 placeholder-gray-400 transition-all duration-200 ${emailError ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                  }`}
                 onFocus={(e) => e.target.style.boxShadow = emailError ? '0 0 0 2px #ef4444' : '0 0 0 2px #003479'}
                 onBlur={(e) => {
                   handleBlur('email');
@@ -299,9 +296,8 @@ export default function Signup() {
                 placeholder="Password *"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className={`w-full pl-12 pr-12 py-3 border rounded-lg focus:ring-2 focus:border-transparent outline-none text-gray-700 placeholder-gray-400 transition-all duration-200 ${
-                  passwordError ? 'border-red-300 bg-red-50' : 'border-gray-300'
-                }`}
+                className={`w-full pl-12 pr-12 py-3 border rounded-lg focus:ring-2 focus:border-transparent outline-none text-gray-700 placeholder-gray-400 transition-all duration-200 ${passwordError ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                  }`}
                 onFocus={(e) => e.target.style.boxShadow = passwordError ? '0 0 0 2px #ef4444' : '0 0 0 2px #003479'}
                 onBlur={(e) => {
                   handleBlur('password');
@@ -338,9 +334,8 @@ export default function Signup() {
                 placeholder="Confirm Password *"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className={`w-full pl-12 pr-12 py-3 border rounded-lg focus:ring-2 focus:border-transparent outline-none text-gray-700 placeholder-gray-400 transition-all duration-200 ${
-                  confirmPasswordError ? 'border-red-300 bg-red-50' : 'border-gray-300'
-                }`}
+                className={`w-full pl-12 pr-12 py-3 border rounded-lg focus:ring-2 focus:border-transparent outline-none text-gray-700 placeholder-gray-400 transition-all duration-200 ${confirmPasswordError ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                  }`}
                 onFocus={(e) => e.target.style.boxShadow = confirmPasswordError ? '0 0 0 2px #ef4444' : '0 0 0 2px #003479'}
                 onBlur={(e) => {
                   handleBlur('confirmPassword');
@@ -367,9 +362,8 @@ export default function Signup() {
             <button
               type="submit"
               disabled={loading || !isFormValid()}
-              className={`w-full text-white font-bold py-4 px-6 rounded-lg transition-all duration-200 flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl transform hover:scale-105 disabled:transform-none cursor-pointer disabled:cursor-not-allowed ${
-                !isFormValid() ? 'opacity-50' : ''
-              }`}
+              className={`w-full text-white font-bold py-4 px-6 rounded-lg transition-all duration-200 flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl transform hover:scale-105 disabled:transform-none cursor-pointer disabled:cursor-not-allowed ${!isFormValid() ? 'opacity-50' : ''
+                }`}
               style={{
                 backgroundColor: loading ? '#6b8cb8' : (isFormValid() ? '#003479' : '#9ca3af'),
               }}
