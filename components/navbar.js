@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import { useRouter } from 'next/router';
-import { 
-  LogOut, 
-  Bell, 
+import {
+  LogOut,
+  Bell,
   Menu,
   X,
   User,
   ChevronDown
 } from 'lucide-react';
+import Link from 'next/link';
 
 export default function Navbar({ user, onLogout }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -37,51 +38,52 @@ export default function Navbar({ user, onLogout }) {
     <nav className="bg-white  border-b border-gray-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
-          
+
           {/* Logo Section */}
           <div className="flex items-center space-x-3">
-            <img 
-              src="/nepalishram-fav.png" 
-              alt="Nepali Shram" 
-              className="w-14 h-14 object-contain"
-              onError={(e) => {
-                e.target.style.display = 'none';
-                e.target.nextSibling.style.display = 'flex';
-              }}
-            />
-            <div className="w-10 h-10 bg-blue-600 rounded-lg hidden items-center justify-center shadow-sm">
-              <span className="text-white font-semibold text-sm">NS</span>
-            </div>
-            <div className="flex flex-col">
-              <h1 className="text-2xl font-semibold text-gray-900 pb-1">
-                Nepali Shram
-              </h1>
-              <span className="text-xs text-gray-500 -mt-1">Applicant Portal</span>
-            </div>
+            <Link href="/" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
+              <img
+                src="/nepalishram-fav.png"
+                alt="Nepali Shram"
+                className="w-14 h-14 object-contain"
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                  e.target.nextSibling.style.display = 'flex';
+                }}
+              />
+              <div className="w-10 h-10 bg-blue-600 rounded-lg hidden items-center justify-center shadow-sm">
+                <span className="text-white font-semibold text-sm">NS</span>
+              </div>
+              <div className="flex flex-col">
+                <h1 className="text-2xl font-semibold text-gray-900 pb-1">
+                  Nepali Shram
+                </h1>
+                <span className="text-xs text-gray-500 -mt-1">Applicant Portal</span>
+              </div>
+            </Link>
+
           </div>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-6">
-            
+
             {/* Language Selector */}
             <div className="flex items-center bg-gray-50 rounded-lg p-1">
               <button
                 onClick={() => handleLanguageChange('EN')}
-                className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
-                  currentLanguage === 'EN' 
-                    ? 'bg-white text-blue-600 shadow-sm' 
+                className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${currentLanguage === 'EN'
+                    ? 'bg-white text-blue-600 shadow-sm'
                     : 'text-gray-600 hover:text-gray-900'
-                }`}
+                  }`}
               >
                 EN
               </button>
               <button
                 onClick={() => handleLanguageChange('NP')}
-                className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
-                  currentLanguage === 'NP' 
-                    ? 'bg-white text-blue-600 shadow-sm' 
+                className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${currentLanguage === 'NP'
+                    ? 'bg-white text-blue-600 shadow-sm'
                     : 'text-gray-600 hover:text-gray-900'
-                }`}
+                  }`}
               >
                 नेप
               </button>
@@ -157,7 +159,7 @@ export default function Navbar({ user, onLogout }) {
       {isMobileMenuOpen && (
         <div className="md:hidden bg-white border-t border-gray-200">
           <div className="px-4 py-4 space-y-4">
-            
+
             {/* Mobile User Info */}
             <div className="flex items-center space-x-3 pb-3 border-b border-gray-100">
               <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
@@ -179,21 +181,19 @@ export default function Navbar({ user, onLogout }) {
               <div className="flex space-x-2">
                 <button
                   onClick={() => handleLanguageChange('EN')}
-                  className={`flex-1 py-2 px-4 text-sm font-medium rounded-lg transition-colors ${
-                    currentLanguage === 'EN' 
-                      ? 'bg-blue-600 text-white' 
+                  className={`flex-1 py-2 px-4 text-sm font-medium rounded-lg transition-colors ${currentLanguage === 'EN'
+                      ? 'bg-blue-600 text-white'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
+                    }`}
                 >
                   English
                 </button>
                 <button
                   onClick={() => handleLanguageChange('NP')}
-                  className={`flex-1 py-2 px-4 text-sm font-medium rounded-lg transition-colors ${
-                    currentLanguage === 'NP' 
-                      ? 'bg-blue-600 text-white' 
+                  className={`flex-1 py-2 px-4 text-sm font-medium rounded-lg transition-colors ${currentLanguage === 'NP'
+                      ? 'bg-blue-600 text-white'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
+                    }`}
                 >
                   नेपाली
                 </button>
@@ -233,7 +233,7 @@ export default function Navbar({ user, onLogout }) {
           </div>
         </div>
       )}
-      
+
       {/* Accent Bar */}
       <div className="bg-red-600 h-0.5"></div>
     </nav>

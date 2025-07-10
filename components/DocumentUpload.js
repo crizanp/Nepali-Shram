@@ -1,33 +1,86 @@
-// Updated DocumentUpload component with Cloudinary upload
+// Updated DocumentUpload component with new document requirements
 import React from 'react';
 import { Upload, FileText, X, Eye } from 'lucide-react';
 
 const DocumentUpload = ({ formData, errors, onFileChange, onRemoveFile }) => {
     const documentConfig = [
-        { name: 'passport', label: 'Passport Front', accept: '.pdf,.jpg,.jpeg,.png' },
-        { name: 'visa', label: 'Valid Visa', accept: '.pdf,.jpg,.jpeg,.png' },
-        { name: 'laborVisaFront', label: 'Labor Visa card(front)', accept: '.pdf,.jpg,.jpeg,.png' },
-        { name: 'laborVisaBack', label: 'Labor Visa card(back)', accept: '.pdf,.jpg,.jpeg,.png' },
-        { name: 'arrival', label: 'Arrival', accept: '.pdf,.jpg,.jpeg,.png' },
-        { name: 'agreementPaper', label: 'Agreement Paper', accept: '.pdf,.jpg,.jpeg,.png' },
-        // Optional fields
-        { name: 'passportBack', label: 'Passport back (If MRP passport not needed)', accept: '.pdf,.jpg,.jpeg,.png' },
-        { name: 'visad', label: 'Previous Visa', accept: '.pdf,.jpg,.jpeg,.png' },
-        { name: 'departure', label: 'Departure', accept: '.pdf,.jpg,.jpeg,.png' },
-        { name: 'furtherInfo', label: 'Further Info', accept: '.pdf,.jpg,.jpeg,.png' },
+        { name: 'passport_front', label: 'Passport Front', accept: '.pdf,.jpg,.jpeg,.png', required: true },
+        { name: 'valid_visa', label: 'Valid Visa', accept: '.pdf,.jpg,.jpeg,.png', required: false },
+        { name: 'labor_visa_front', label: 'Labor Visa card(front)', accept: '.pdf,.jpg,.jpeg,.png', required: true },
+        { name: 'labor_visa_back', label: 'Labor Visa card(back)', accept: '.pdf,.jpg,.jpeg,.png', required: false },
+        { name: 'arrival', label: 'Arrival', accept: '.pdf,.jpg,.jpeg,.png', required: true },
+        { name: 'agreement_paper', label: 'Agreement Paper', accept: '.pdf,.jpg,.jpeg,.png', required: true },
+        { name: 'passport_back', label: 'Passport back (If MRP passport not needed)', accept: '.pdf,.jpg,.jpeg,.png', required: true },
+        { name: 'previous_visa', label: 'Previous Visa', accept: '.pdf,.jpg,.jpeg,.png', required: false },
+        { name: 'departure', label: 'Departure', accept: '.pdf,.jpg,.jpeg,.png', required: true },
+        { name: 'further_info', label: 'Further Info', accept: '.pdf,.jpg,.jpeg,.png', required: false }
     ];
 
     const handleViewDocument = (document, label) => {
-        if (!document || !document.url) {
+        if (!document || !document.base64) {
             alert('Document not available for viewing');
             return;
         }
 
         try {
-            // Open Cloudinary URL directly
-            const newWindow = window.open(document.url, '_blank');
-            if (!newWindow) {
-                alert('Please allow popups to view the document');
+            if (document.type === 'application/pdf') {
+                // Handle PDF viewing
+                const base64Data = document.base64.includes(',') 
+                    ? document.base64.split(',')[1] 
+                    : document.base64;
+                    
+                const byteCharacters = atob(base64Data);
+                const byteNumbers = new Array(byteCharacters.length);
+                for (let i = 0; i < byteCharacters.length; i++) {
+                    byteNumbers[i] = byteCharacters.charCodeAt(i);
+                }
+                const byteArray = new Uint8Array(byteNumbers);
+                const blob = new Blob([byteArray], { type: 'application/pdf' });
+                const url = URL.createObjectURL(blob);
+                
+                const newWindow = window.open('', '_blank');
+                if (newWindow) {
+                    newWindow.location.href = url;
+                    // Clean up the URL after a delay
+                    setTimeout(() => URL.revokeObjectURL(url), 1000);
+                } else {
+                    alert('Please allow popups to view the document');
+                }
+            } else {
+                // Handle image viewing
+                const newWindow = window.open('', '_blank');
+                if (newWindow) {
+                    newWindow.document.write(`
+                        <html>
+                            <head>
+                                <title>${label}</title>
+                                <style>
+                                    body { 
+                                        margin: 0; 
+                                        padding: 20px; 
+                                        background: #f0f0f0; 
+                                        display: flex; 
+                                        justify-content: center; 
+                                        align-items: center; 
+                                        min-height: 100vh; 
+                                    }
+                                    img { 
+                                        max-width: 90vw; 
+                                        max-height: 90vh; 
+                                        object-fit: contain; 
+                                        box-shadow: 0 4px 8px rgba(0,0,0,0.1); 
+                                    }
+                                </style>
+                            </head>
+                            <body>
+                                <img src="${document.base64}" alt="${label}" onload="document.title='${label} - Loaded'" onerror="document.body.innerHTML='<p>Error loading image</p>'" />
+                            </body>
+                        </html>
+                    `);
+                    newWindow.document.close();
+                } else {
+                    alert('Please allow popups to view the document');
+                }
             }
         } catch (error) {
             console.error('Error viewing document:', error);
@@ -59,7 +112,7 @@ const DocumentUpload = ({ formData, errors, onFileChange, onRemoveFile }) => {
                                 <div className="h-48 rounded-lg overflow-hidden border-2 border-green-300 bg-white">
                                     {formData[doc.name].type && formData[doc.name].type.startsWith('image/') ? (
                                         <img
-                                            src={formData[doc.name].url || formData[doc.name].previewUrl}
+                                            src={formData[doc.name].base64}
                                             alt={doc.label}
                                             className="w-full h-full object-contain"
                                             onError={(e) => {
@@ -86,7 +139,7 @@ const DocumentUpload = ({ formData, errors, onFileChange, onRemoveFile }) => {
                                     )}
 
                                     <div className="absolute top-2 left-2 bg-white bg-opacity-90 px-2 py-1 rounded text-xs font-medium text-gray-900">
-                                        {doc.label}
+                                        {doc.label} {doc.required && <span className="text-red-500">*</span>}
                                     </div>
 
                                     <button
@@ -124,7 +177,7 @@ const DocumentUpload = ({ formData, errors, onFileChange, onRemoveFile }) => {
                             >
                                 <Upload className="w-12 h-12 text-gray-400 mb-4" />
                                 <h3 className="text-lg font-bold text-gray-900 mb-2">
-                                    {doc.label} {['passport', 'visa', 'laborVisaFront', 'laborVisaBack', 'arrival', 'agreementPaper'].includes(doc.name) ? '*' : ''}
+                                    {doc.label} {doc.required && <span className="text-red-500">*</span>}
                                 </h3>
                                 <p className="text-sm text-blue-600 font-medium">Click to upload</p>
                                 <p className="text-xs text-gray-500 mt-2">

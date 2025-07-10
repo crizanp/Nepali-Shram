@@ -1,58 +1,24 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/router';
-import { 
-  Eye, 
-  Download, 
-  Clock, 
-  CheckCircle, 
-  XCircle, 
-  AlertCircle, 
+import {
+  Eye,
+  Clock,
+  CheckCircle,
+  XCircle,
+  AlertCircle,
   FileText,
-  Calendar,
-  User,
-  Mail,
-  Phone,
-  MapPin,
-  Trash2
+  Trash2,
+  Edit 
 } from 'lucide-react';
 
-// Mock Navbar and Footer components
-const Navbar = ({ user, onLogout }) => (
-  <nav className="bg-white shadow-sm border-b">
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div className="flex justify-between items-center h-16">
-        <div className="flex items-center">
-          <h1 className="text-xl font-bold text-gray-900">Application Portal</h1>
-        </div>
-        <div className="flex items-center space-x-4">
-          <span className="text-sm text-gray-700">Welcome, {user?.name}</span>
-          <button
-            onClick={onLogout}
-            className="text-sm text-red-600 hover:text-red-800"
-          >
-            Logout
-          </button>
-        </div>
-      </div>
-    </div>
-  </nav>
-);
-
-const Footer = () => (
-  <footer className="bg-gray-800 text-white py-8 mt-auto">
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-      <p>&copy; 2025 Application Portal. All rights reserved.</p>
-    </div>
-  </footer>
-);
+import Navbar from '../components/navbar';
+import Footer from '../components/footer';
 
 export default function ApplicationsPage() {
   const [applications, setApplications] = useState([]);
-  const [selectedApplication, setSelectedApplication] = useState(null);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState({ name: 'John Doe', email: 'john@example.com' });
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [showDetails, setShowDetails] = useState(false);
   const [withdrawing, setWithdrawing] = useState(null);
   const router = useRouter();
 
@@ -64,7 +30,7 @@ export default function ApplicationsPage() {
           setLoading(false);
           return;
         }
-        
+
         const token = localStorage.getItem('token');
         if (!token) {
           router.replace('/login');
@@ -159,59 +125,9 @@ export default function ApplicationsPage() {
     );
   };
 
-  // View application details
-  const viewApplication = async (applicationId) => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/applications/${applicationId}`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch application details');
-      }
-
-      const data = await response.json();
-      setSelectedApplication(data);
-      setShowDetails(true);
-    } catch (error) {
-      console.error('Error fetching application details:', error);
-      alert('Error fetching application details.');
-    }
-  };
-
-  // Download document
-  const downloadDocument = async (applicationId, documentType) => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/applications/${applicationId}/download/${documentType}`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to download document');
-      }
-
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${documentType}_${applicationId}`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-    } catch (error) {
-      console.error('Error downloading document:', error);
-      alert('Error downloading document.');
-    }
+  // Navigate to application details page
+  const viewApplication = (applicationId) => {
+    router.push(`/applications/${applicationId}`);
   };
 
   // Withdraw application
@@ -237,7 +153,7 @@ export default function ApplicationsPage() {
       }
 
       // Update the application status in the list
-      setApplications(prev => prev.map(app => 
+      setApplications(prev => prev.map(app =>
         app._id === applicationId ? { ...app, status: 'withdrawn' } : app
       ));
 
@@ -249,15 +165,15 @@ export default function ApplicationsPage() {
       setWithdrawing(null);
     }
   };
-
+ const editApplication = (applicationId) => {
+    router.push(`/applications/${applicationId}/edit`);
+  };
   // Format date
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+      day: 'numeric'
     });
   };
 
@@ -277,23 +193,23 @@ export default function ApplicationsPage() {
     );
   }
 
-  return (
+   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Navbar user={user} onLogout={handleLogout} />
-      
+
       <div className="flex-1 py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}
-          <div className="mb-8">
+          <div className="bg-blue-100 border border-blue-300 rounded-xl p-6 mb-8">
             <h1 className="text-3xl font-bold text-gray-900">My Applications</h1>
-            <p className="text-gray-600 mt-2">View and manage your submitted applications</p>
-            <div className="mt-4">
-              <button
-                onClick={() => router.push('/apply')}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                New Application
-              </button>
+            <p className="text-gray-700 mt-2">View and manage your submitted applications</p>
+
+            <div className="mt-4 text-sm text-blue-800">
+              <p className="font-medium">Note:</p>
+              <ul className="list-disc list-inside mt-1 space-y-1">
+                <li>You can submit a new application <span className="font-semibold">after your current application is approved</span>.</li>
+                <li>You can <span className="font-semibold">edit your application</span> until it's approved.</li>
+              </ul>
             </div>
           </div>
 
@@ -302,7 +218,7 @@ export default function ApplicationsPage() {
             <div className="bg-white rounded-lg shadow p-8 text-center">
               <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">No Applications Found</h3>
-              <p className="text-gray-600 mb-4">You haven not submitted any applications yet.</p>
+              <p className="text-gray-600 mb-4">You haven't submitted any applications yet.</p>
               <button
                 onClick={() => router.push('/apply')}
                 className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
@@ -317,7 +233,7 @@ export default function ApplicationsPage() {
                   Applications ({applications.length})
                 </h2>
               </div>
-              
+
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
@@ -357,19 +273,19 @@ export default function ApplicationsPage() {
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
                           <button
                             onClick={() => viewApplication(application._id)}
-                            className="text-blue-600 hover:text-blue-900 inline-flex items-center"
+                            className="text-blue-600 cursor-pointer hover:text-blue-900 inline-flex items-center"
                           >
                             <Eye className="w-4 h-4 mr-1" />
                             View
                           </button>
-                          {['submitted', 'under_review'].includes(application.status) && (
+                          {/* Replace withdraw button with edit button */}
+                          {['submitted', 'under_review', 'pending_documents', 'rejected'].includes(application.status) && (
                             <button
-                              onClick={() => withdrawApplication(application._id)}
-                              disabled={withdrawing === application._id}
-                              className="text-red-600 hover:text-red-900 inline-flex items-center disabled:opacity-50"
+                              onClick={() => editApplication(application._id)}
+                              className="text-green-600 cursor-pointer hover:text-green-900 inline-flex items-center"
                             >
-                              <Trash2 className="w-4 h-4 mr-1" />
-                              {withdrawing === application._id ? 'Withdrawing...' : 'Withdraw'}
+                              <Edit className="w-4 h-4 mr-1" />
+                              Edit
                             </button>
                           )}
                         </td>
@@ -382,133 +298,6 @@ export default function ApplicationsPage() {
           )}
         </div>
       </div>
-
-      {/* Application Details Modal */}
-      {showDetails && selectedApplication && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-11/12 max-w-4xl shadow-lg rounded-md bg-white">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-2xl font-bold text-gray-900">
-                Application Details
-              </h3>
-              <button
-                onClick={() => setShowDetails(false)}
-                className="text-gray-400 hover:text-gray-600"
-              >
-                <XCircle className="w-6 h-6" />
-              </button>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Basic Information */}
-              <div className="space-y-4">
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <h4 className="font-semibold text-gray-900 mb-3">Basic Information</h4>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex items-center">
-                      <FileText className="w-4 h-4 mr-2 text-gray-500" />
-                      <span className="font-medium">Application Number:</span>
-                      <span className="ml-2">{selectedApplication.applicationNumber}</span>
-                    </div>
-                    <div className="flex items-center">
-                      <User className="w-4 h-4 mr-2 text-gray-500" />
-                      <span className="font-medium">Full Name:</span>
-                      <span className="ml-2">{selectedApplication.fullName}</span>
-                    </div>
-                    <div className="flex items-center">
-                      <Mail className="w-4 h-4 mr-2 text-gray-500" />
-                      <span className="font-medium">Email:</span>
-                      <span className="ml-2">{selectedApplication.email}</span>
-                    </div>
-                    <div className="flex items-center">
-                      <Phone className="w-4 h-4 mr-2 text-gray-500" />
-                      <span className="font-medium">Phone:</span>
-                      <span className="ml-2">{selectedApplication.phone}</span>
-                    </div>
-                    <div className="flex items-center">
-                      <MapPin className="w-4 h-4 mr-2 text-gray-500" />
-                      <span className="font-medium">Address:</span>
-                      <span className="ml-2">{selectedApplication.address}</span>
-                    </div>
-                    <div className="flex items-center">
-                      <Calendar className="w-4 h-4 mr-2 text-gray-500" />
-                      <span className="font-medium">Date of Birth:</span>
-                      <span className="ml-2">{new Date(selectedApplication.dateOfBirth).toLocaleDateString()}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <h4 className="font-semibold text-gray-900 mb-3">Additional Details</h4>
-                  <div className="space-y-2 text-sm">
-                    <div>
-                      <span className="font-medium">Nationality:</span>
-                      <span className="ml-2">{selectedApplication.nationality}</span>
-                    </div>
-                    <div>
-                      <span className="font-medium">Passport Number:</span>
-                      <span className="ml-2">{selectedApplication.passportNumber}</span>
-                    </div>
-                    <div>
-                      <span className="font-medium">Experience:</span>
-                      <span className="ml-2">{selectedApplication.experience}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Status and Documents */}
-              <div className="space-y-4">
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <h4 className="font-semibold text-gray-900 mb-3">Application Status</h4>
-                  <div className="space-y-2">
-                    <div>{getStatusBadge(selectedApplication.status)}</div>
-                    <div className="text-sm text-gray-600">
-                      <span className="font-medium">Submitted:</span>
-                      <span className="ml-2">{formatDate(selectedApplication.submittedAt)}</span>
-                    </div>
-                    {selectedApplication.lastUpdated && (
-                      <div className="text-sm text-gray-600">
-                        <span className="font-medium">Last Updated:</span>
-                        <span className="ml-2">{formatDate(selectedApplication.lastUpdated)}</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <h4 className="font-semibold text-gray-900 mb-3">Documents</h4>
-                  <div className="space-y-2">
-                    {Object.entries(selectedApplication.documents || {}).map(([docType, docInfo]) => (
-                      <div key={docType} className="flex items-center justify-between">
-                        <span className="text-sm capitalize">
-                          {docType.replace('_', ' ')}
-                        </span>
-                        <button
-                          onClick={() => downloadDocument(selectedApplication._id, docType)}
-                          className="text-blue-600 hover:text-blue-900 text-sm inline-flex items-center"
-                        >
-                          <Download className="w-3 h-3 mr-1" />
-                          Download
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-6 flex justify-end">
-              <button
-                onClick={() => setShowDetails(false)}
-                className="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400 transition-colors"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       <Footer />
     </div>

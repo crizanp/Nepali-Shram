@@ -28,7 +28,7 @@ export default function ServicesContainer() {
       bgColor: 'bg-blue-900',
       iconColor: 'text-green-600',
       description: 'Check application status',
-      link: 'portal/status'
+      link: 'application'
     },
     {
       id: 3,

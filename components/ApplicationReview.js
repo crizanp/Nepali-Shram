@@ -1,12 +1,18 @@
 import React from 'react';
 import { Eye, User, FileText, CheckCircle, X } from 'lucide-react';
 
-const ApplicationReview = ({ formData, onEditStep }) => {
+const ApplicationReview = ({ formData, onGoToStep }) => {
     const documentConfig = [
-        { name: 'passport', label: 'Passport Copy' },
-        { name: 'photo', label: 'Passport Size Photo' },
-        { name: 'certificate', label: 'Educational Certificate' },
-        { name: 'experience_letter', label: 'Experience Letter' }
+        { name: 'passport_front', label: 'Passport Front', accept: '.pdf,.jpg,.jpeg,.png', required: true },
+        { name: 'valid_visa', label: 'Valid Visa', accept: '.pdf,.jpg,.jpeg,.png', required: false },
+        { name: 'labor_visa_front', label: 'Labor Visa card(front)', accept: '.pdf,.jpg,.jpeg,.png', required: true },
+        { name: 'labor_visa_back', label: 'Labor Visa card(back)', accept: '.pdf,.jpg,.jpeg,.png', required: false },
+        { name: 'arrival', label: 'Arrival', accept: '.pdf,.jpg,.jpeg,.png', required: true },
+        { name: 'agreement_paper', label: 'Agreement Paper', accept: '.pdf,.jpg,.jpeg,.png', required: true },
+        { name: 'passport_back', label: 'Passport back (If MRP passport not needed)', accept: '.pdf,.jpg,.jpeg,.png', required: true },
+        { name: 'previous_visa', label: 'Previous Visa', accept: '.pdf,.jpg,.jpeg,.png', required: false },
+        { name: 'departure', label: 'Departure', accept: '.pdf,.jpg,.jpeg,.png', required: true },
+        { name: 'further_info', label: 'Further Info', accept: '.pdf,.jpg,.jpeg,.png', required: false }
     ];
 
     const handleViewDocument = (document, label) => {
@@ -48,7 +54,7 @@ const ApplicationReview = ({ formData, onEditStep }) => {
                 <h2 className="text-xl font-semibold text-gray-900">Review Your Application</h2>
             </div>
 
-            {/* Personal Information Review */}
+            {/* Personal Information Review - Only 5 fields */}
             <div className="bg-gray-50 rounded-lg p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
                     <User className="w-5 h-5 mr-2" />
@@ -57,35 +63,23 @@ const ApplicationReview = ({ formData, onEditStep }) => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label className="block text-sm font-medium text-gray-700">Full Name</label>
-                        <p className="mt-1 text-sm text-gray-900 bg-white p-2 rounded border">{formData.fullName}</p>
+                        <p className="mt-1 text-sm text-gray-900 bg-white p-2 rounded border">{formData.fullName || 'Not provided'}</p>
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Email</label>
-                        <p className="mt-1 text-sm text-gray-900 bg-white p-2 rounded border">{formData.email}</p>
+                        <label className="block text-sm font-medium text-gray-700">Email Address</label>
+                        <p className="mt-1 text-sm text-gray-900 bg-white p-2 rounded border">{formData.email || 'Not provided'}</p>
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Phone</label>
-                        <p className="mt-1 text-sm text-gray-900 bg-white p-2 rounded border">{formData.phone}</p>
+                        <label className="block text-sm font-medium text-gray-700">Phone Number</label>
+                        <p className="mt-1 text-sm text-gray-900 bg-white p-2 rounded border">{formData.phone || 'Not provided'}</p>
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Date of Birth</label>
-                        <p className="mt-1 text-sm text-gray-900 bg-white p-2 rounded border">{formData.dateOfBirth}</p>
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700">Nationality</label>
-                        <p className="mt-1 text-sm text-gray-900 bg-white p-2 rounded border">{formData.nationality}</p>
+                        <label className="block text-sm font-medium text-gray-700">WhatsApp Number</label>
+                        <p className="mt-1 text-sm text-gray-900 bg-white p-2 rounded border">{formData.whatsappNumber || 'Not provided'}</p>
                     </div>
                     <div>
                         <label className="block text-sm font-medium text-gray-700">Passport Number</label>
-                        <p className="mt-1 text-sm text-gray-900 bg-white p-2 rounded border">{formData.passportNumber}</p>
-                    </div>
-                    <div className="md:col-span-2">
-                        <label className="block text-sm font-medium text-gray-700">Address</label>
-                        <p className="mt-1 text-sm text-gray-900 bg-white p-2 rounded border">{formData.address}</p>
-                    </div>
-                    <div className="md:col-span-2">
-                        <label className="block text-sm font-medium text-gray-700">Work Experience</label>
-                        <p className="mt-1 text-sm text-gray-900 bg-white p-2 rounded border whitespace-pre-wrap">{formData.experience}</p>
+                        <p className="mt-1 text-sm text-gray-900 bg-white p-2 rounded border">{formData.passportNumber || 'Not provided'}</p>
                     </div>
                 </div>
             </div>
@@ -135,14 +129,14 @@ const ApplicationReview = ({ formData, onEditStep }) => {
                 <h3 className="text-sm font-bold text-blue-900 mb-2">Need to make changes?</h3>
                 <div className="flex gap-2">
                     <button
-                        onClick={() => onEditStep(1)}
+                        onClick={() => onGoToStep(1)}
                         className="text-blue-600 cursor-pointer hover:text-blue-800 text-sm font-medium underline"
                     >
                         Edit Personal Information
                     </button>
                     <span className="text-blue-600">•</span>
                     <button
-                        onClick={() => onEditStep(2)}
+                        onClick={() => onGoToStep(2)}
                         className="text-blue-600 cursor-pointer hover:text-blue-800 text-sm font-medium underline"
                     >
                         Edit Documents
