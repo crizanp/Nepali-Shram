@@ -180,7 +180,7 @@ export default function ApplicationDetails() {
   const getStatusBadge = (status) => {
     const statusConfig = {
       submitted: { icon: Clock, color: 'bg-yellow-100 text-yellow-800', text: t.statusSubmitted },
-      under_review: { icon: AlertCircle, color: 'bg-blue-100 text-blue-800', text: t.statusUnderReview },
+      under_review: { icon: AlertCircle, color: 'bg-red-100 text-red-800', text: t.statusUnderReview },
       approved: { icon: CheckCircle, color: 'bg-green-100 text-green-800', text: t.statusApproved },
       rejected: { icon: XCircle, color: 'bg-red-100 text-red-800', text: t.statusRejected },
       pending_documents: { icon: FileText, color: 'bg-orange-100 text-orange-800', text: t.statusPendingDocuments },
@@ -364,7 +364,7 @@ export default function ApplicationDetails() {
         <Navbar user={user} onLogout={handleLogout} />
         <div className="flex-1 flex items-center justify-center bg-gray-50">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-blue-500 mx-auto mb-4"></div>
+            <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-red-500 mx-auto mb-4"></div>
             <p className="text-gray-900">{t.loadingMessage}</p>
           </div>
         </div>
@@ -382,7 +382,7 @@ export default function ApplicationDetails() {
             <p className="text-gray-900">{t.applicationNotFound}</p>
             <button
               onClick={() => router.push('/application')}
-              className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+              className="mt-4 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700"
             >
               {t.backToApplications}
             </button>
@@ -515,7 +515,7 @@ export default function ApplicationDetails() {
                     {/* Download button */}
                     <button
                       onClick={() => downloadDocument(docType)}
-                      className="w-full inline-flex items-center justify-center px-3 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+                      className="w-full inline-flex items-center justify-center px-3 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition-colors"
                     >
                       <Download className="w-4 h-4 mr-2" />
                       {t.download}

@@ -1,355 +1,714 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
-import { 
-  User, 
-  Lock, 
-  LogOut, 
-  LayoutDashboard 
+import { useTranslation } from '../context/TranslationContext';
+import { useAuth } from '../context/AuthContext';
+import Navbar from '../components/navbar';
+import Footer from '../components/footer';
+import {
+  User,
+  Mail,
+  Phone,
+  MapPin,
+  Calendar,
+  Edit3,
+  Save,
+  X,
+  Camera,
+  Eye,
+  EyeOff,
+  Lock,
+  Shield,
+  AlertCircle,
+  Check
 } from 'lucide-react';
 
-export default function Profile() {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [updating, setUpdating] = useState(false);
-  const [name, setName] = useState('');
-  const [currentPassword, setCurrentPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [message, setMessage] = useState('');
-  const [error, setError] = useState('');
-  
+export default function ProfilePage() {
+  const { isNepali } = useTranslation();
+  const { user, updateProfile, logout } = useAuth();
   const router = useRouter();
 
+  const [loading, setLoading] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [changingPassword, setChangingPassword] = useState(false);
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [message, setMessage] = useState({ type: '', text: '' });
+
+  // Form states
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    address: '',
+    dateOfBirth: '',
+    nationality: '',
+    emergencyContact: '',
+    emergencyPhone: '',
+    bio: ''
+  });
+
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
+
+  const [profilePhoto, setProfilePhoto] = useState(null);
+  const [photoPreview, setPhotoPreview] = useState(null);
+
+  // Translations
+  const text = {
+    title: isNepali ? 'मेरो प्रोफाइल' : 'My Profile',
+    personalInfo: isNepali ? 'व्यक्तिगत जानकारी' : 'Personal Information',
+    contactInfo: isNepali ? 'सम्पर्क जानकारी' : 'Contact Information',
+    emergencyInfo: isNepali ? 'आपातकालीन सम्पर्क' : 'Emergency Contact',
+    security: isNepali ? 'सुरक्षा' : 'Security',
+    name: isNepali ? 'नाम' : 'Full Name',
+    email: isNepali ? 'इमेल' : 'Email',
+    phone: isNepali ? 'फोन नम्बर' : 'Phone Number',
+    address: isNepali ? 'ठेगाना' : 'Address',
+    dateOfBirth: isNepali ? 'जन्म मिति' : 'Date of Birth',
+    nationality: isNepali ? 'राष्ट्रियता' : 'Nationality',
+    emergencyContact: isNepali ? 'आपातकालीन सम्पर्क व्यक्ति' : 'Emergency Contact Person',
+    emergencyPhone: isNepali ? 'आपातकालीन फोन' : 'Emergency Phone',
+    bio: isNepali ? 'बायो' : 'Bio',
+    edit: isNepali ? 'सम्पादन गर्नुहोस्' : 'Edit Profile',
+    save: isNepali ? 'सेभ गर्नुहोस्' : 'Save Changes',
+    cancel: isNepali ? 'रद्द गर्नुहोस्' : 'Cancel',
+    changePassword: isNepali ? 'पासवर्ड परिवर्तन गर्नुहोस्' : 'Change Password',
+    currentPassword: isNepali ? 'हालको पासवर्ड' : 'Current Password',
+    newPassword: isNepali ? 'नयाँ पासवर्ड' : 'New Password',
+    confirmPassword: isNepali ? 'पासवर्ड पुष्टि गर्नुहोस्' : 'Confirm Password',
+    changePhoto: isNepali ? 'फोटो परिवर्तन गर्नुहोस्' : 'Change Photo',
+    uploadPhoto: isNepali ? 'फोटो अपलोड गर्नुहोस्' : 'Upload Photo',
+    loading: isNepali ? 'लोड हुँदै...' : 'Loading...',
+    success: isNepali ? 'सफलतापूर्वक अपडेट भयो' : 'Successfully updated',
+    error: isNepali ? 'त्रुटि देखा पर्यो' : 'An error occurred',
+    passwordMismatch: isNepali ? 'पासवर्डहरू मेल खाएनन्' : 'Passwords do not match',
+    required: isNepali ? 'आवश्यक' : 'Required',
+    optional: isNepali ? 'वैकल्पिक' : 'Optional',
+    redirecting: isNepali ? 'लगइनमा रिडिरेक्ट गर्दै...' : 'Redirecting to login...',
+    unauthorized: isNepali ? 'अनधिकृत पहुँच' : 'Unauthorized access'
+  };
+
+  // Initialize form data from auth context
   useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        
-        if (!token) {
-          router.push('/login');
-          return;
-        }
-        
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/me`, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-        
-        if (!response.ok) {
-          throw new Error('Authentication failed');
-        }
-        
-        const userData = await response.json();
-        setUser(userData);
-        setName(userData.name || '');
-      } catch (error) {
-        console.error('Profile error:', error);
-        localStorage.removeItem('token');
-        router.push('/login');
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    fetchProfile();
-  }, [router]);
-
-  const handleUpdateProfile = async (e) => {
-    e.preventDefault();
-    setUpdating(true);
-    setMessage('');
-    setError('');
-
-    try {
-      const token = localStorage.getItem('token');
-      
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/update-profile`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ name }),
+    if (user) {
+      console.log('User data:', user); // Debug log
+      setFormData({
+        name: user.name || '',
+        email: user.email || '',
+        phone: user.phone || '',
+        address: user.address || '',
+        dateOfBirth: formatDateForInput(user.dateOfBirth || user.date_of_birth), // Handle both field names
+        nationality: user.nationality || '',
+        emergencyContact: user.emergencyContact || user.emergency_contact, // Handle both field names
+        emergencyPhone: user.emergencyPhone || user.emergency_phone, // Handle both field names
+        bio: user.bio || ''
       });
-      
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to update profile');
+
+      // Set profile photo if it exists
+      if (user.profilePhoto || user.profile_photo) {
+        setPhotoPreview(user.profilePhoto || user.profile_photo);
       }
-      
-      setUser({ ...user, name });
-      setMessage('Profile updated successfully');
-    } catch (err) {
-      setError(err.message || 'An error occurred while updating profile');
-    } finally {
-      setUpdating(false);
+    }
+  }, [user]);
+
+
+  // Redirect if not authenticated
+  useEffect(() => {
+    if (!user && typeof window !== 'undefined') {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        router.replace('/login');
+      }
+    }
+  }, [user, router]);
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handlePasswordChange = (e) => {
+    const { name, value } = e.target;
+    setPasswordData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handlePhotoChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setProfilePhoto(file);
+      const reader = new FileReader();
+      reader.onload = (e) => setPhotoPreview(e.target.result);
+      reader.readAsDataURL(file);
     }
   };
 
-  const handleChangePassword = async (e) => {
-    e.preventDefault();
-    setUpdating(true);
-    setMessage('');
-    setError('');
+  const handleSave = async () => {
+    try {
+      setLoading(true);
 
-    if (newPassword !== confirmPassword) {
-      setError('New passwords do not match');
-      setUpdating(false);
-      return;
+      // Validate required fields
+      if (!formData.name || !formData.email) {
+        setMessage({ type: 'error', text: text.required });
+        setLoading(false);
+        return;
+      }
+
+      // Prepare update data with proper field names
+      const updateData = {
+        name: formData.name.trim(),
+        phone: formData.phone ? formData.phone.trim() : null,
+        address: formData.address ? formData.address.trim() : null,
+        dateOfBirth: formData.dateOfBirth || null,
+        nationality: formData.nationality ? formData.nationality.trim() : null,
+        emergencyContact: formData.emergencyContact ? formData.emergencyContact.trim() : null,
+        emergencyPhone: formData.emergencyPhone ? formData.emergencyPhone.trim() : null,
+        bio: formData.bio ? formData.bio.trim() : null,
+        profilePhoto: photoPreview || null // Use photoPreview which contains the base64 string
+      };
+
+      console.log('Sending update data:', updateData);
+
+      // Use the updateProfile function from AuthContext
+      const result = await updateProfile(updateData);
+
+      if (result.success) {
+        setEditing(false);
+        setProfilePhoto(null);
+        // Don't clear photoPreview here - let it stay to show the updated photo
+        setMessage({ type: 'success', text: result.message || text.success });
+      } else {
+        setMessage({ type: 'error', text: result.error || text.error });
+      }
+
+      // Clear message after 3 seconds
+      setTimeout(() => setMessage({ type: '', text: '' }), 3000);
+    } catch (error) {
+      console.error('Profile update error:', error);
+      setMessage({ type: 'error', text: text.error });
+    } finally {
+      setLoading(false);
     }
+  };
+  const formatDateForInput = (dateString) => {
+    if (!dateString) return '';
 
     try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return '';
+
+      // Format to YYYY-MM-DD for HTML date input
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+
+      return `${year}-${month}-${day}`;
+    } catch (error) {
+      console.error('Date formatting error:', error);
+      return '';
+    }
+  };
+  const handlePasswordSave = async () => {
+    try {
+      setLoading(true);
+
+      // Validate passwords
+      if (!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword) {
+        setMessage({ type: 'error', text: text.required });
+        setLoading(false);
+        return;
+      }
+
+      if (passwordData.newPassword !== passwordData.confirmPassword) {
+        setMessage({ type: 'error', text: text.passwordMismatch });
+        setLoading(false);
+        return;
+      }
+
+      // Make API call to change password
       const token = localStorage.getItem('token');
-      
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/change-password`, {
-        method: 'PUT',
+        method: 'PUT', // Make sure this is PUT, not POST
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ 
-          currentPassword, 
-          newPassword 
-        }),
+        body: JSON.stringify({
+          currentPassword: passwordData.currentPassword,
+          newPassword: passwordData.newPassword
+        })
       });
-      
+
       const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to change password');
+
+      if (response.ok) {
+        setChangingPassword(false);
+        setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+        setMessage({ type: 'success', text: data.message || text.success });
+      } else {
+        setMessage({ type: 'error', text: data.message || text.error });
       }
-      
-      setCurrentPassword('');
-      setNewPassword('');
-      setConfirmPassword('');
-      setMessage('Password changed successfully');
-    } catch (err) {
-      setError(err.message || 'An error occurred while changing password');
+
+      // Clear message after 3 seconds
+      setTimeout(() => setMessage({ type: '', text: '' }), 3000);
+    } catch (error) {
+      console.error('Password change error:', error);
+      setMessage({ type: 'error', text: text.error });
     } finally {
-      setUpdating(false);
+      setLoading(false);
     }
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    router.push('/login');
+    logout();
+  };
+  const formatDateForDisplay = (dateString) => {
+    if (!dateString) return '';
+
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return '';
+
+      // Format for display (you can customize this)
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+    } catch (error) {
+      console.error('Date display formatting error:', error);
+      return dateString; // Return original if formatting fails
+    }
+  };
+  const capitalizeWords = (str) => {
+    if (!str) return '';
+    return str
+      .toLowerCase()
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
   };
 
-  if (loading) {
+  // Show loading state if user is not loaded yet
+  if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-blue-500 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading profile...</p>
+          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-red-500 mx-auto mb-4"></div>
+          <p className="text-gray-600">{text.loading}</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <Head>
-        <title>Profile | Professional App</title>
-      </Head>
+    <>
+      <div className="min-h-screen bg-red-50">
+        <Head>
+          <title>{text.title} | {isNepali ? 'नेपाली श्रम' : 'Nepali Shram'}</title>
+        </Head>
 
-      {/* Top Navigation */}
-      <nav className="bg-white shadow-md">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16 items-center">
-            <div className="flex items-center space-x-4">
-              <span className="text-2xl font-bold text-blue-600">Cz App</span>
-              <div className="hidden md:flex space-x-4">
-                <button 
-                  onClick={() => router.push('/dashboard')}
-                  className="text-gray-600 hover:text-blue-600 flex items-center"
-                >
-                  <LayoutDashboard className="h-4 w-4 mr-2" />
-                  Dashboard
-                </button>
-                <button 
-                  onClick={() => router.push('/profile')}
-                  className="text-blue-600 flex items-center"
-                >
-                  <User className="h-4 w-4 mr-2" />
-                  Profile
-                </button>
-              </div>
-            </div>
-            <div className="flex items-center space-x-4">
-              <button 
-                onClick={handleLogout}
-                className="bg-blue-500 text-white px-3 py-1.5 rounded-md hover:bg-blue-600 transition flex items-center"
-              >
-                <LogOut className="h-4 w-4 mr-2" />
-                Logout
-              </button>
-            </div>
-          </div>
-        </div>
-      </nav>
+        <Navbar user={user} onLogout={handleLogout} />
 
-      {/* Main Profile Content */}
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-gray-700">
-        <header className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Profile Settings</h1>
-          <p className="text-gray-500 mt-2">Manage your account information and security settings.</p>
-        </header>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* Profile Information */}
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <div className="flex items-center mb-6">
-              <User className="h-8 w-8 text-blue-500 mr-4" />
-              <h2 className="text-xl font-semibold text-gray-800">Profile Information</h2>
+        <div className="py-8">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            {/* Header */}
+            <div className="mb-8">
+              {message.text && (
+                <div className={`mt-4 p-4 rounded-lg flex items-center ${message.type === 'success' ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'
+                  }`}>
+                  {message.type === 'success' ? <Check className="w-5 h-5 mr-2" /> : <AlertCircle className="w-5 h-5 mr-2" />}
+                  {message.text}
+                </div>
+              )}
             </div>
 
-            {message && (
-              <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-                {message}
-              </div>
-            )}
-            {error && (
-              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-                {error}
-              </div>
-            )}
-
-            <form onSubmit={handleUpdateProfile} className="space-y-4">
-              <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                  Full Name
-                </label>
-                <input
-                  id="name"
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                  Email Address
-                </label>
-                <input
-                  id="email"
-                  type="email"
-                  value={user?.email || ''}
-                  disabled
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-100 cursor-not-allowed"
-                />
-                <p className="text-xs text-gray-500 mt-1">Email cannot be changed</p>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              {/* Profile Photo Section */}
+              <div className="lg:col-span-1">
+                <div className="bg-white rounded-lg shadow-sm p-6">
+                  <div className="text-center">
+                    <div className="relative inline-block">
+                      <div className="w-32 h-32 rounded-full overflow-hidden bg-gray-200 mx-auto">
+                        {photoPreview || user?.profilePhoto || user?.profile_photo ? (
+                          <img
+                            src={photoPreview || user?.profilePhoto || user?.profile_photo}
+                            alt="Profile"
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <User className="w-12 h-12 text-gray-400" />
+                          </div>
+                        )}
+                      </div>
+                      {editing && (
+                        <label className="absolute bottom-0 right-0 bg-red-500 text-white rounded-full p-2 cursor-pointer hover:bg-red-600 transition-colors">
+                          <Camera className="w-4 h-4" />
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handlePhotoChange}
+                            className="hidden"
+                          />
+                        </label>
+                      )}
+                    </div>
+                    {editing && <p className="mt-2 text-sm text-gray-500">{text.changePhoto}</p>}
+                  </div>
+                </div>
               </div>
 
-              <button
-                type="submit"
-                disabled={updating}
-                className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 transition disabled:opacity-50"
-              >
-                {updating ? 'Updating...' : 'Update Profile'}
-              </button>
-            </form>
-          </div>
+              {/* Main Content */}
+              <div className="lg:col-span-2 space-y-6">
+                {/* Personal Information */}
+                <div className="bg-white rounded-lg shadow-sm">
+                  <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+                    <h2 className="text-lg font-semibold text-gray-900 flex items-center">
+                      <User className="w-5 h-5 mr-2" />
+                      {text.personalInfo}
+                    </h2>
+                    {!editing && (
+                      <button
+                        onClick={() => setEditing(true)}
+                        className="cursor-pointer text-red-600 hover:text-red-800 flex items-center"
+                        disabled={loading}
+                      >
+                        <Edit3 className="w-4 h-4 mr-1" />
+                        {text.edit}
+                      </button>
+                    )}
+                  </div>
+                  <div className="p-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          {text.name} *
+                        </label>
+                        {editing ? (
+                          <input
+                            type="text"
+                            name="name"
+                            value={formData.name}
+                            onChange={handleInputChange}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+                            required
+                          />
+                        ) : (
+                          <p className="text-gray-900">{capitalizeWords(user?.name)}</p>
+                        )}
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          {text.dateOfBirth}
+                        </label>
+                        {editing ? (
+                          <input
+                            type="date"
+                            name="dateOfBirth"
+                            value={formData.dateOfBirth}
+                            onChange={handleInputChange}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+                          />
+                        ) : (
+                          <p className="text-gray-900">
+                            {user?.dateOfBirth || user?.date_of_birth
+                              ? formatDateForDisplay(user?.dateOfBirth || user?.date_of_birth)
+                              : '-'
+                            }
+                          </p>
+                        )}
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          {text.nationality}
+                        </label>
+                        {editing ? (
+                          <input
+                            type="text"
+                            name="nationality"
+                            value={formData.nationality}
+                            onChange={handleInputChange}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+                          />
+                        ) : (
+                          <p className="text-gray-900">{user?.nationality || '-'}</p>
+                        )}
+                      </div>
+                    </div>
+                    <div className="mt-6">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        {text.bio}
+                      </label>
+                      {editing ? (
+                        <textarea
+                          name="bio"
+                          value={formData.bio}
+                          onChange={handleInputChange}
+                          rows={3}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+                          placeholder={`${text.bio} (${text.optional})`}
+                        />
+                      ) : (
+                        <p className="text-gray-900">{user?.bio || '-'}</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
 
-          {/* Security Settings */}
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <div className="flex items-center mb-6">
-              <Lock className="h-8 w-8 text-green-500 mr-4" />
-              <h2 className="text-xl font-semibold text-gray-800">Change Password</h2>
+                {/* Contact Information */}
+                <div className="bg-white rounded-lg shadow-sm">
+                  <div className="px-6 py-4 border-b border-gray-200">
+                    <h2 className="text-lg font-semibold text-gray-900 flex items-center">
+                      <Mail className="w-5 h-5 mr-2" />
+                      {text.contactInfo}
+                    </h2>
+                  </div>
+                  <div className="p-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          {text.email} *
+                        </label>
+                        {editing ? (
+                          <input
+                            type="email"
+                            name="email"
+                            value={formData.email}
+                            onChange={handleInputChange}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+                            required
+                          />
+                        ) : (
+                          <p className="text-gray-900">{user?.email}</p>
+                        )}
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          {text.phone}
+                        </label>
+                        {editing ? (
+                          <input
+                            type="tel"
+                            name="phone"
+                            value={formData.phone}
+                            onChange={handleInputChange}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+                          />
+                        ) : (
+                          <p className="text-gray-900">{user?.phone || '-'}</p>
+                        )}
+                      </div>
+                    </div>
+                    <div className="mt-6">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        {text.address}
+                      </label>
+                      {editing ? (
+                        <textarea
+                          name="address"
+                          value={formData.address}
+                          onChange={handleInputChange}
+                          rows={2}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+                        />
+                      ) : (
+                        <p className="text-gray-900">{user?.address || '-'}</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Emergency Contact */}
+                <div className="bg-white rounded-lg shadow-sm">
+                  <div className="px-6 py-4 border-b border-gray-200">
+                    <h2 className="text-lg font-semibold text-gray-900 flex items-center">
+                      <Phone className="w-5 h-5 mr-2" />
+                      {text.emergencyInfo}
+                    </h2>
+                  </div>
+                  <div className="p-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          {text.emergencyContact}
+                        </label>
+                        {editing ? (
+                          <input
+                            type="text"
+                            name="emergencyContact"
+                            value={formData.emergencyContact}
+                            onChange={handleInputChange}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+                          />
+                        ) : (
+                          <p className="text-gray-900">{user?.emergency_contact || '-'}</p>
+                        )}
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          {text.emergencyPhone}
+                        </label>
+                        {editing ? (
+                          <input
+                            type="tel"
+                            name="emergencyPhone"
+                            value={formData.emergencyPhone}
+                            onChange={handleInputChange}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+                          />
+                        ) : (
+                          <p className="text-gray-900">{user?.emergency_phone || '-'}</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Security Section */}
+                <div className="bg-white rounded-lg shadow-sm">
+                  <div className="px-6 py-4 border-b border-gray-200">
+                    <h2 className="text-lg font-semibold text-gray-900 flex items-center">
+                      <Shield className="w-5 h-5 mr-2" />
+                      {text.security}
+                    </h2>
+                  </div>
+                  <div className="p-6">
+                    {!changingPassword ? (
+                      <button
+                        onClick={() => setChangingPassword(true)}
+                        className="cursor-pointer flex items-center text-red-600 hover:text-red-800"
+                        disabled={loading}
+                      >
+                        <Lock className="w-4 h-4 mr-2" />
+                        {text.changePassword}
+                      </button>
+                    ) : (
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            {text.currentPassword}
+                          </label>
+                          <div className="relative">
+                            <input
+                              type={showCurrentPassword ? 'text' : 'password'}
+                              name="currentPassword"
+                              value={passwordData.currentPassword}
+                              onChange={handlePasswordChange}
+                              className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+                              required
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                              className="cursor-pointer absolute right-3 top-2.5 text-gray-400 hover:text-gray-600"
+                            >
+                              {showCurrentPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                            </button>
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            {text.newPassword}
+                          </label>
+                          <div className="relative">
+                            <input
+                              type={showNewPassword ? 'text' : 'password'}
+                              name="newPassword"
+                              value={passwordData.newPassword}
+                              onChange={handlePasswordChange}
+                              className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+                              required
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setShowNewPassword(!showNewPassword)}
+                              className="cursor-pointer absolute right-3 top-2.5 text-gray-400 hover:text-gray-600"
+                            >
+                              {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                            </button>
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            {text.confirmPassword}
+                          </label>
+                          <div className="relative">
+                            <input
+                              type={showConfirmPassword ? 'text' : 'password'}
+                              name="confirmPassword"
+                              value={passwordData.confirmPassword}
+                              onChange={handlePasswordChange}
+                              className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+                              required
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                              className="cursor-pointer absolute right-3 top-2.5 text-gray-400 hover:text-gray-600"
+                            >
+                              {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                {(editing || changingPassword) && (
+                  <div className="flex justify-end space-x-4">
+                    <button
+                      onClick={() => {
+                        setEditing(false);
+                        setChangingPassword(false);
+                        setFormData({
+                          name: user?.name || '',
+                          email: user?.email || '',
+                          phone: user?.phone || '',
+                          address: user?.address || '',
+                          dateOfBirth: user?.dateOfBirth || '',
+                          nationality: user?.nationality || '',
+                          emergencyContact: user?.emergencyContact || '',
+                          emergencyPhone: user?.emergencyPhone || '',
+                          bio: user?.bio || ''
+                        });
+                        setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+                        setProfilePhoto(null);
+                        setPhotoPreview(null);
+                      }}
+                      className="cursor-pointer px-4 py-2 text-gray-600 hover:text-gray-800 flex items-center"
+                      disabled={loading}
+                    >
+                      <X className="w-4 h-4 mr-2" />
+                      {text.cancel}
+                    </button>
+                    <button
+                      onClick={editing ? handleSave : handlePasswordSave}
+                      className="cursor-pointer px-6 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 flex items-center disabled:opacity-50"
+                      disabled={loading}
+                    >
+                      {loading ? (
+                        <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-white mr-2"></div>
+                      ) : (
+                        <Save className="w-4 h-4 mr-2" />
+                      )}
+                      {text.save}
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
-
-            <form onSubmit={handleChangePassword} className="space-y-4">
-              <div>
-                <label htmlFor="current-password" className="block text-sm font-medium text-gray-700 mb-2">
-                  Current Password
-                </label>
-                <input
-                  id="current-password"
-                  type="password"
-                  value={currentPassword}
-                  onChange={(e) => setCurrentPassword(e.target.value)}
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="new-password" className="block text-sm font-medium text-gray-700 mb-2">
-                  New Password
-                </label>
-                <input
-                  id="new-password"
-                  type="password"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  required
-                  minLength={8}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <p className="text-xs text-gray-500 mt-1">Minimum 8 characters</p>
-              </div>
-
-              <div>
-                <label htmlFor="confirm-password" className="block text-sm font-medium text-gray-700 mb-2">
-                  Confirm New Password
-                </label>
-                <input
-                  id="confirm-password"
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  required
-                  minLength={8}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              <button
-                type="submit"
-                disabled={updating}
-                className="w-full bg-green-500 text-white py-2 rounded-md hover:bg-green-600 transition disabled:opacity-50"
-              >
-                {updating ? 'Changing Password...' : 'Change Password'}
-              </button>
-            </form>
-          </div>
-        </div>
-
-        {/* Account Danger Zone */}
-        <div className="mt-8 bg-white rounded-lg shadow-md p-6">
-          <div className="flex items-center mb-6">
-            <div className="w-full">
-              <h2 className="text-xl font-semibold text-red-600">Danger Zone</h2>
-              <p className="text-sm text-gray-500">Proceed with caution</p>
-            </div>
-          </div>
-          <div className="flex justify-between items-center">
-            <div>
-              <h3 className="text-lg font-medium text-gray-900">Delete Account</h3>
-              <p className="text-sm text-gray-500">Permanently remove your account and all associated data</p>
-            </div>
-            <button
-              onClick={() => {
-                // Implement account deletion logic
-                const confirmDelete = window.confirm('Are you sure you want to delete your account? This action cannot be undone.');
-                if (confirmDelete) {
-                  // Add account deletion API call
-                  console.log('Account deletion requested');
-                }
-              }}
-              className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition"
-            >
-              Delete Account
-            </button>
           </div>
         </div>
       </div>
-    </div>
+
+      <Footer />
+    </>
   );
 }
-

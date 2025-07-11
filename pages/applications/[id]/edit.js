@@ -394,7 +394,7 @@ export default function EditApplication() {
                 <Navbar user={user} onLogout={handleLogout} />
                 <div className="flex-1 flex items-center justify-center bg-gray-50">
                     <div className="text-center">
-                        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-blue-500 mx-auto mb-4"></div>
+                        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-red-500 mx-auto mb-4"></div>
                         <p className="text-gray-900">{text.loading}</p>
                     </div>
                 </div>
@@ -412,7 +412,7 @@ export default function EditApplication() {
                         <p className="text-gray-900">{text.notFound}</p>
                         <button
                             onClick={() => router.push('/application')}
-                            className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                            className="mt-4 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700"
                         >
                             {text.backToApplications}
                         </button>
@@ -462,7 +462,7 @@ export default function EditApplication() {
                                         name="fullName"
                                         value={formData.fullName}
                                         onChange={handleInputChange}
-                                        className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.fullName ? 'border-red-500' : 'border-gray-300'
+                                        className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 ${errors.fullName ? 'border-red-500' : 'border-gray-300'
                                             }`}
                                     />
                                     {errors.fullName && <p className="text-red-500 text-sm mt-1">{errors.fullName}</p>}
@@ -477,7 +477,7 @@ export default function EditApplication() {
                                         name="email"
                                         value={formData.email}
                                         onChange={handleInputChange}
-                                        className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.email ? 'border-red-500' : 'border-gray-300'
+                                        className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 ${errors.email ? 'border-red-500' : 'border-gray-300'
                                             }`}
                                     />
                                     {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
@@ -492,7 +492,7 @@ export default function EditApplication() {
                                         name="phone"
                                         value={formData.phone}
                                         onChange={handleInputChange}
-                                        className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.phone ? 'border-red-500' : 'border-gray-300'
+                                        className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 ${errors.phone ? 'border-red-500' : 'border-gray-300'
                                             }`}
                                     />
                                     {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone}</p>}
@@ -507,7 +507,7 @@ export default function EditApplication() {
                                         name="whatsappNumber"
                                         value={formData.whatsappNumber}
                                         onChange={handleInputChange}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
                                     />
                                 </div>
 
@@ -520,7 +520,7 @@ export default function EditApplication() {
                                         name="passportNumber"
                                         value={formData.passportNumber}
                                         onChange={handleInputChange}
-                                        className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.passportNumber ? 'border-red-500' : 'border-gray-300'
+                                        className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 ${errors.passportNumber ? 'border-red-500' : 'border-gray-300'
                                             }`}
                                     />
                                     {errors.passportNumber && <p className="text-red-500 text-sm mt-1">{errors.passportNumber}</p>}
@@ -580,7 +580,7 @@ export default function EditApplication() {
                                                                         href={formData.documents[docType.key]}
                                                                         download={`${docType.label}`}
                                                                         title={text.download}
-                                                                        className="text-blue-600 hover:text-blue-800"
+                                                                        className="text-red-600 hover:text-red-800"
                                                                     >
                                                                         <Download className="w-5 h-5" />
                                                                     </a>
@@ -639,7 +639,7 @@ export default function EditApplication() {
                                                     type="file"
                                                     accept=".pdf,.jpg,.jpeg,.png"
                                                     onChange={(e) => handleFileUpload(docType.key, e.target.files[0])}
-                                                    className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                                                    className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:bg-red-50 file:text-red-700 hover:file:bg-red-100"
                                                 />
                                                 <p className="text-xs text-gray-500">
                                                     {text.replaceDocument}
@@ -651,7 +651,7 @@ export default function EditApplication() {
                                                     type="file"
                                                     accept=".pdf,.jpg,.jpeg,.png"
                                                     onChange={(e) => handleFileUpload(docType.key, e.target.files[0])}
-                                                    className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                                                    className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:bg-red-50 file:text-red-700 hover:file:bg-red-100"
                                                 />
                                                 <p className="text-xs text-gray-500">
                                                     {text.replaceDocument}
@@ -729,7 +729,7 @@ export default function EditApplication() {
                             <button
                                 type="submit"
                                 disabled={saving}
-                                className="px-6 py-3 cursor-pointer bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                                className="px-6 py-3 cursor-pointer bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
                             >
                                 {saving ? (
                                     <>

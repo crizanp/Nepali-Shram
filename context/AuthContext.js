@@ -128,43 +128,36 @@ useEffect(() => {
     router.push('/login');
   };
 
-  const updateProfile = async (updatedData) => {
-    try {
-      const token = localStorage.getItem('token');
-      
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/update-profile`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(updatedData),
-      });
-      
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.message || 'Profile update failed');
-      }
-      
-      // Update local user state
-      setUser(prevUser => ({ ...prevUser, ...updatedData }));
-      
-      return { 
-        success: true,
-        message: 'Profile updated successfully',
-        user: data.user
-      };
-    } catch (error) {
-      console.error('Profile update error:', error);
-      
-      return { 
-        success: false, 
-        error: error.message || 'An unexpected error occurred'
-      };
+  const updateProfile = async (profileData) => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No token found');
     }
-  };
 
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/update-profile`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(profileData)
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      // Update user state with new profile data
+      setUser(data.user);
+      return { success: true, message: data.message };
+    } else {
+      return { success: false, error: data.message };
+    }
+  } catch (error) {
+    console.error('Profile update error:', error);
+    return { success: false, error: 'Failed to update profile' };
+  }
+};
   return (
     <AuthContext.Provider
       value={{

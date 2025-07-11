@@ -162,7 +162,7 @@ export default function ApplicationsPage() {
   const getStatusBadge = (status) => {
     const statusConfig = {
       submitted: { icon: Clock, color: 'bg-yellow-100 text-yellow-800', text: text.statusSubmitted },
-      under_review: { icon: AlertCircle, color: 'bg-blue-100 text-blue-800', text: text.statusUnderReview },
+      under_review: { icon: AlertCircle, color: 'bg-red-100 text-red-800', text: text.statusUnderReview },
       approved: { icon: CheckCircle, color: 'bg-green-100 text-green-800', text: text.statusApproved },
       rejected: { icon: XCircle, color: 'bg-red-100 text-red-800', text: text.statusRejected },
       pending_documents: { icon: FileText, color: 'bg-orange-100 text-orange-800', text: text.statusPendingDocuments },
@@ -241,7 +241,7 @@ export default function ApplicationsPage() {
         <Navbar user={user} onLogout={handleLogout} />
         <div className="flex-1 flex items-center justify-center bg-gray-50">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-blue-500 mx-auto mb-4"></div>
+            <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-red-500 mx-auto mb-4"></div>
             <p className="text-gray-900">{text.loadingApplications}</p>
           </div>
         </div>
@@ -257,11 +257,11 @@ export default function ApplicationsPage() {
       <div className="flex-1 py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}
-          <div className="bg-blue-100 border border-blue-300 rounded-xl p-6 mb-8">
+          <div className="bg-red-100 border border-red-300 rounded-xl p-6 mb-8">
             <h1 className="text-3xl font-bold text-gray-900">{text.myApplications}</h1>
             <p className="text-gray-700 mt-2">{text.viewAndManage}</p>
 
-            <div className="mt-4 text-sm text-blue-800">
+            <div className="mt-4 text-sm text-red-800">
               <p className="font-medium">{text.note}</p>
               <ul className="list-disc list-inside mt-1 space-y-1">
                 <li>
@@ -282,7 +282,7 @@ export default function ApplicationsPage() {
               <p className="text-gray-600 mb-4">{text.noApplicationsText}</p>
               <button
                 onClick={() => router.push('/apply')}
-                className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
+                className="bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 transition-colors"
               >
                 {text.submitFirstApplication}
               </button>
@@ -334,7 +334,7 @@ export default function ApplicationsPage() {
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
                           <button
                             onClick={() => viewApplication(application._id)}
-                            className="text-blue-600 cursor-pointer hover:text-blue-900 inline-flex items-center"
+                            className="text-red-600 cursor-pointer hover:text-red-900 inline-flex items-center"
                           >
                             <Eye className="w-4 h-4 mr-1" />
                             {text.view}

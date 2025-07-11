@@ -15,6 +15,8 @@ export default function Signup() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendMessage, setResendMessage] = useState('');
   const [touched, setTouched] = useState({
     name: false,
     email: false,
@@ -76,6 +78,7 @@ export default function Signup() {
     setTouched(prev => ({ ...prev, [field]: true }));
   };
 
+  // SIGNUP FUNCTION
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -102,12 +105,49 @@ export default function Signup() {
     setError('');
 
     try {
+      console.log('Attempting signup for:', email);
       const response = await authApi.signup(name, email, password);
+      console.log('Signup successful:', response);
       setEmailSent(true);
     } catch (err) {
+      console.error('Signup error:', err);
       setError(err.message || 'An error occurred during signup');
     } finally {
       setLoading(false);
+    }
+  };
+
+  // SEPARATE RESEND VERIFICATION FUNCTION
+  const handleResendVerification = async () => {
+    setResendLoading(true);
+    setResendMessage('');
+    setError('');
+
+    try {
+      console.log('Attempting to resend verification email to:', email);
+      
+      // Call the resend verification API endpoint
+      const response = await fetch('/api/auth/resend-verification-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to resend verification email');
+      }
+
+      console.log('Resend verification successful:', data);
+      setResendMessage('Verification email sent successfully! Please check your inbox.');
+    } catch (err) {
+      console.error('Resend verification error:', err);
+      setError(err.message || 'Failed to resend verification email');
+    } finally {
+      setResendLoading(false);
     }
   };
 
@@ -153,15 +193,30 @@ export default function Signup() {
                 We have sent a verification link to <strong>{email}</strong>.
                 Please check your inbox and click the link to verify your account.
               </p>
+              
+              {/* Show success message if resend was successful */}
+              {resendMessage && (
+                <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-4">
+                  {resendMessage}
+                </div>
+              )}
+
+              {/* Show error message if resend failed */}
+              {error && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4">
+                  {error}
+                </div>
+              )}
+
               <p className="text-sm text-gray-600">
                 Did not receive the email?{' '}
                 <button
-                  onClick={handleSubmit}
+                  onClick={handleResendVerification}
                   className="font-medium hover:underline cursor-pointer transition-colors duration-200"
                   style={{ color: '#003479' }}
-                  disabled={loading}
+                  disabled={resendLoading}
                 >
-                  Resend verification email
+                  {resendLoading ? 'Sending...' : 'Resend verification email'}
                 </button>
               </p>
             </div>
@@ -183,13 +238,12 @@ export default function Signup() {
 
   return (
     <>
-      {/* Head component would go here in your Next.js app */}
       <div className="min-h-screen flex flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8"
         style={{
           background: 'linear-gradient(135deg, #003479 0%, #0054a6 40%, rgb(144, 180, 255) 70%, rgb(173, 199, 255) 100%)'
         }}>
 
-        {/* Signup Card - Made wider */}
+        {/* Signup Card */}
         <div className="bg-white rounded-xl shadow-2xl p-8 w-full max-w-xl">
           <div className="mb-4">
             {/* Gradient Border Wrapper */}
@@ -215,10 +269,11 @@ export default function Signup() {
             <p className="text-sm text-gray-600">
               Or{' '}
               <Link href="/login" className="font-medium hover:underline cursor-pointer transition-colors duration-200" style={{ color: '#003479' }}>
-              sign in to your existing account
+                sign in to your existing account
               </Link>
             </p>
           </div>
+          
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4" role="alert">
               <span className="block sm:inline">{error}</span>
@@ -242,8 +297,7 @@ export default function Signup() {
                 placeholder="Full Name *"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className={`w-full pl-12 pr-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent outline-none text-gray-700 placeholder-gray-400 transition-all duration-200 ${nameError ? 'border-red-300 bg-red-50' : 'border-gray-300'
-                  }`}
+                className={`w-full pl-12 pr-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent outline-none text-gray-700 placeholder-gray-400 transition-all duration-200 ${nameError ? 'border-red-300 bg-red-50' : 'border-gray-300'}`}
                 onFocus={(e) => e.target.style.boxShadow = nameError ? '0 0 0 2px #ef4444' : '0 0 0 2px #003479'}
                 onBlur={(e) => {
                   handleBlur('name');

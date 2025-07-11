@@ -91,13 +91,14 @@ export default function ServicesContainer() {
     },
     {
       id: 6,
-      title: text.services.settings.title,
-      icon: Settings,
+      title: isNepali ? 'समाचार' : 'News',
+      icon: FileText, 
       bgColor: 'bg-blue-900',
       iconColor: 'text-teal-600',
-      description: text.services.settings.description,
-      link: 'portal/settings'
+      description: isNepali ? 'नवीनतम समाचारहरू पढ्नुहोस्' : 'Read the latest news',
+      link: 'news'
     }
+
   ];
 
   const handleCardClick = (service) => {
@@ -143,11 +144,11 @@ export default function ServicesContainer() {
                     className={`w-10 h-10 ${service.iconColor}`}
                   />
                 </div>
-               
+
                 <h3 className="text-2xl font-semibold text-gray-100">
                   {service.title}
                 </h3>
-               
+
                 <p className="text-lg text-gray-200 leading-relaxed">
                   {service.description}
                 </p>
