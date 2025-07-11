@@ -8,11 +8,13 @@ import {
   AlertCircle,
   FileText,
   Trash2,
-  Edit 
+  Edit,
+  Languages
 } from 'lucide-react';
 
 import Navbar from '../components/navbar';
 import Footer from '../components/footer';
+import { useTranslation } from '../context/TranslationContext';
 
 export default function ApplicationsPage() {
   const [applications, setApplications] = useState([]);
@@ -21,6 +23,59 @@ export default function ApplicationsPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [withdrawing, setWithdrawing] = useState(null);
   const router = useRouter();
+  const { isNepali } = useTranslation();
+
+  // Translation texts
+  const text = {
+    // Header and navigation
+    myApplications: isNepali ? 'मेरा आवेदनहरू' : 'My Applications',
+    viewAndManage: isNepali ? 'तपाईंका पेश गरिएका आवेदनहरू हेर्नुहोस् र व्यवस्थापन गर्नुहोस्' : 'View and manage your submitted applications',
+    
+    // Loading
+    loadingApplications: isNepali ? 'आवेदनहरू लोड हुँदैछ...' : 'Loading applications...',
+    
+    // Notes
+    note: isNepali ? 'टिप्पणी:' : 'Note:',
+    noteText1: isNepali ? 'तपाईंले नयाँ आवेदन पेश गर्न सक्नुहुन्छ' : 'You can submit a new application',
+    noteText1Bold: isNepali ? 'तपाईंको हालको आवेदन स्वीकृत भएपछि' : 'after your current application is approved',
+    noteText2: isNepali ? 'तपाईंले आफ्नो आवेदन' : 'You can',
+    noteText2Bold: isNepali ? 'सम्पादन गर्न सक्नुहुन्छ' : 'edit your application',
+    noteText2End: isNepali ? 'स्वीकृत नभएसम्म।' : 'until it\'s approved.',
+    
+    // Empty state
+    noApplicationsFound: isNepali ? 'कुनै आवेदन फेला परेन' : 'No Applications Found',
+    noApplicationsText: isNepali ? 'तपाईंले अहिलेसम्म कुनै आवेदन पेश गर्नुभएको छैन।' : 'You haven\'t submitted any applications yet.',
+    submitFirstApplication: isNepali ? 'आफ्नो पहिलो आवेदन पेश गर्नुहोस्' : 'Submit Your First Application',
+    
+    // Table headers
+    applicationNumber: isNepali ? 'आवेदन नम्बर' : 'Application Number',
+    fullName: isNepali ? 'पूरा नाम' : 'Full Name',
+    status: isNepali ? 'स्थिति' : 'Status',
+    submitted: isNepali ? 'पेश गरिएको' : 'Submitted',
+    actions: isNepali ? 'कार्यहरू' : 'Actions',
+    
+    // Status badges
+    statusSubmitted: isNepali ? 'पेश गरिएको' : 'Submitted',
+    statusUnderReview: isNepali ? 'समीक्षाधीन' : 'Under Review',
+    statusApproved: isNepali ? 'स्वीकृत' : 'Approved',
+    statusRejected: isNepali ? 'अस्वीकृत' : 'Rejected',
+    statusPendingDocuments: isNepali ? 'कागजात बाँकी' : 'Pending Documents',
+    statusWithdrawn: isNepali ? 'फिर्ता लिइएको' : 'Withdrawn',
+    
+    // Action buttons
+    view: isNepali ? 'हेर्नुहोस्' : 'View',
+    edit: isNepali ? 'सम्पादन गर्नुहोस्' : 'Edit',
+    withdraw: isNepali ? 'फिर्ता लिनुहोस्' : 'Withdraw',
+    
+    // Confirmation and alerts
+    withdrawConfirm: isNepali ? 'के तपाईं यो आवेदन फिर्ता लिन निश्चित हुनुहुन्छ? यो कार्य पूर्ववत गर्न सकिँदैन।' : 'Are you sure you want to withdraw this application? This action cannot be undone.',
+    withdrawSuccess: isNepali ? 'आवेदन सफलतापूर्वक फिर्ता लिइयो।' : 'Application withdrawn successfully.',
+    withdrawError: isNepali ? 'त्रुटि:' : 'Error:',
+    fetchError: isNepali ? 'आवेदनहरू ल्याउनमा त्रुटि भयो। कृपया पृष्ठ रिफ्रेस गर्नुहोस्।' : 'Error fetching applications. Please refresh the page.',
+    
+    // Application count
+    applicationsCount: isNepali ? 'आवेदनहरू' : 'Applications'
+  };
 
   // Authentication check
   useEffect(() => {
@@ -86,14 +141,14 @@ export default function ApplicationsPage() {
         setApplications(data);
       } catch (error) {
         console.error('Error fetching applications:', error);
-        alert('Error fetching applications. Please refresh the page.');
+        alert(text.fetchError);
       } finally {
         setLoading(false);
       }
     }
 
     fetchApplications();
-  }, [isAuthenticated]);
+  }, [isAuthenticated, text.fetchError]);
 
   // Handle logout
   const handleLogout = useCallback(() => {
@@ -106,12 +161,12 @@ export default function ApplicationsPage() {
   // Get status badge
   const getStatusBadge = (status) => {
     const statusConfig = {
-      submitted: { icon: Clock, color: 'bg-yellow-100 text-yellow-800', text: 'Submitted' },
-      under_review: { icon: AlertCircle, color: 'bg-blue-100 text-blue-800', text: 'Under Review' },
-      approved: { icon: CheckCircle, color: 'bg-green-100 text-green-800', text: 'Approved' },
-      rejected: { icon: XCircle, color: 'bg-red-100 text-red-800', text: 'Rejected' },
-      pending_documents: { icon: FileText, color: 'bg-orange-100 text-orange-800', text: 'Pending Documents' },
-      withdrawn: { icon: XCircle, color: 'bg-gray-100 text-gray-800', text: 'Withdrawn' }
+      submitted: { icon: Clock, color: 'bg-yellow-100 text-yellow-800', text: text.statusSubmitted },
+      under_review: { icon: AlertCircle, color: 'bg-blue-100 text-blue-800', text: text.statusUnderReview },
+      approved: { icon: CheckCircle, color: 'bg-green-100 text-green-800', text: text.statusApproved },
+      rejected: { icon: XCircle, color: 'bg-red-100 text-red-800', text: text.statusRejected },
+      pending_documents: { icon: FileText, color: 'bg-orange-100 text-orange-800', text: text.statusPendingDocuments },
+      withdrawn: { icon: XCircle, color: 'bg-gray-100 text-gray-800', text: text.statusWithdrawn }
     };
 
     const config = statusConfig[status] || statusConfig.submitted;
@@ -132,7 +187,7 @@ export default function ApplicationsPage() {
 
   // Withdraw application
   const withdrawApplication = async (applicationId) => {
-    if (!confirm('Are you sure you want to withdraw this application? This action cannot be undone.')) {
+    if (!confirm(text.withdrawConfirm)) {
       return;
     }
 
@@ -157,20 +212,22 @@ export default function ApplicationsPage() {
         app._id === applicationId ? { ...app, status: 'withdrawn' } : app
       ));
 
-      alert('Application withdrawn successfully.');
+      alert(text.withdrawSuccess);
     } catch (error) {
       console.error('Error withdrawing application:', error);
-      alert(`Error: ${error.message}`);
+      alert(`${text.withdrawError} ${error.message}`);
     } finally {
       setWithdrawing(null);
     }
   };
- const editApplication = (applicationId) => {
+
+  const editApplication = (applicationId) => {
     router.push(`/applications/${applicationId}/edit`);
   };
+
   // Format date
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
+    return new Date(dateString).toLocaleDateString(isNepali ? 'ne-NP' : 'en-US', {
       year: 'numeric',
       month: 'short',
       day: 'numeric'
@@ -185,7 +242,7 @@ export default function ApplicationsPage() {
         <div className="flex-1 flex items-center justify-center bg-gray-50">
           <div className="text-center">
             <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-blue-500 mx-auto mb-4"></div>
-            <p className="text-gray-900">Loading applications...</p>
+            <p className="text-gray-900">{text.loadingApplications}</p>
           </div>
         </div>
         <Footer />
@@ -193,7 +250,7 @@ export default function ApplicationsPage() {
     );
   }
 
-   return (
+  return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Navbar user={user} onLogout={handleLogout} />
 
@@ -201,14 +258,18 @@ export default function ApplicationsPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}
           <div className="bg-blue-100 border border-blue-300 rounded-xl p-6 mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">My Applications</h1>
-            <p className="text-gray-700 mt-2">View and manage your submitted applications</p>
+            <h1 className="text-3xl font-bold text-gray-900">{text.myApplications}</h1>
+            <p className="text-gray-700 mt-2">{text.viewAndManage}</p>
 
             <div className="mt-4 text-sm text-blue-800">
-              <p className="font-medium">Note:</p>
+              <p className="font-medium">{text.note}</p>
               <ul className="list-disc list-inside mt-1 space-y-1">
-                <li>You can submit a new application <span className="font-semibold">after your current application is approved</span>.</li>
-                <li>You can <span className="font-semibold">edit your application</span> until it's approved.</li>
+                <li>
+                  {text.noteText1} <span className="font-semibold">{text.noteText1Bold}</span>.
+                </li>
+                <li>
+                  {text.noteText2} <span className="font-semibold">{text.noteText2Bold}</span> {text.noteText2End}
+                </li>
               </ul>
             </div>
           </div>
@@ -217,20 +278,20 @@ export default function ApplicationsPage() {
           {applications.length === 0 ? (
             <div className="bg-white rounded-lg shadow p-8 text-center">
               <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No Applications Found</h3>
-              <p className="text-gray-600 mb-4">You haven't submitted any applications yet.</p>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">{text.noApplicationsFound}</h3>
+              <p className="text-gray-600 mb-4">{text.noApplicationsText}</p>
               <button
                 onClick={() => router.push('/apply')}
                 className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
               >
-                Submit Your First Application
+                {text.submitFirstApplication}
               </button>
             </div>
           ) : (
             <div className="bg-white rounded-lg shadow overflow-hidden">
               <div className="px-6 py-4 border-b border-gray-200">
                 <h2 className="text-lg font-medium text-gray-900">
-                  Applications ({applications.length})
+                  {text.applicationsCount} ({applications.length})
                 </h2>
               </div>
 
@@ -239,19 +300,19 @@ export default function ApplicationsPage() {
                   <thead className="bg-gray-50">
                     <tr>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Application Number
+                        {text.applicationNumber}
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Full Name
+                        {text.fullName}
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Status
+                        {text.status}
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Submitted
+                        {text.submitted}
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Actions
+                        {text.actions}
                       </th>
                     </tr>
                   </thead>
@@ -276,16 +337,16 @@ export default function ApplicationsPage() {
                             className="text-blue-600 cursor-pointer hover:text-blue-900 inline-flex items-center"
                           >
                             <Eye className="w-4 h-4 mr-1" />
-                            View
+                            {text.view}
                           </button>
-                          {/* Replace withdraw button with edit button */}
+                          {/* Edit button for editable statuses */}
                           {['submitted', 'under_review', 'pending_documents', 'rejected'].includes(application.status) && (
                             <button
                               onClick={() => editApplication(application._id)}
                               className="text-green-600 cursor-pointer hover:text-green-900 inline-flex items-center"
                             >
                               <Edit className="w-4 h-4 mr-1" />
-                              Edit
+                              {text.edit}
                             </button>
                           )}
                         </td>

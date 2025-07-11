@@ -1,4 +1,5 @@
 import { AuthProvider } from '@/context/AuthContext';
+import { TranslationProvider } from '@/context/TranslationContext';
 import '../styles/globals.css';
 import Head from 'next/head';
 
@@ -7,12 +8,13 @@ function MyApp({ Component, pageProps }) {
     <>
       <Head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Auth System</title>
+        <title>Nepali Shram Portal</title>
       </Head>
-      <AuthProvider>
-
-      <Component {...pageProps} />
-      </AuthProvider>
+      <TranslationProvider>
+        <AuthProvider>
+          <Component {...pageProps} />
+        </AuthProvider>
+      </TranslationProvider>
     </>
   );
 }

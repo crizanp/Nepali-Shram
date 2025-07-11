@@ -1,12 +1,24 @@
 import React from 'react';
 import { Check } from 'lucide-react';
+import { useTranslation } from '../context/TranslationContext';
 
 const ProgressIndicator = ({ currentStep, steps }) => {
-    const defaultSteps = [
+    const { isNepali } = useTranslation();
+
+   const defaultSteps = isNepali
+    ? [
+        { id: 1, label: 'प्रयोगकर्ता विवरण' },
+        { id: 2, label: 'कागजातहरू' },
+        { id: 3, label: 'भुक्तानी प्रमाण' },  // New step
+        { id: 4, label: 'पुनरावलोकन' },
+        { id: 5, label: 'सम्झौता' }
+    ]
+    : [
         { id: 1, label: 'User Details' },
         { id: 2, label: 'Documents' },
-        { id: 3, label: 'Review' },
-        { id: 4, label: 'Agreement' }
+        { id: 3, label: 'Payment Proof' },  // New step
+        { id: 4, label: 'Review' },
+        { id: 5, label: 'Agreement' }
     ];
 
     const stepData = steps || defaultSteps;

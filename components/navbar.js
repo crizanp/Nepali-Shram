@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/router';
+import { useTranslation } from '../context/TranslationContext';
 import {
   LogOut,
   Bell,
@@ -12,10 +13,19 @@ import Link from 'next/link';
 
 export default function Navbar({ user, onLogout }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [currentLanguage, setCurrentLanguage] = useState('EN');
   const [notifications, setNotifications] = useState(3);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const router = useRouter();
+  const { language, changeLanguage, isNepali } = useTranslation();
+
+  // Translations defined right in the component
+  const text = {
+    title: isNepali ? 'नेपाली श्रम' : 'Nepali Shram',
+    subtitle: isNepali ? 'आवेदक पोर्टल' : 'Applicant Portal',
+    notifications: isNepali ? 'सूचनाहरू' : 'Notifications',
+    signOut: isNepali ? 'साइन आउट' : 'Sign out',
+    language: isNepali ? 'भाषा' : 'Language'
+  };
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -26,7 +36,7 @@ export default function Navbar({ user, onLogout }) {
   };
 
   const handleLanguageChange = (lang) => {
-    setCurrentLanguage(lang);
+    changeLanguage(lang);
     setIsMobileMenuOpen(false);
   };
 
@@ -35,7 +45,7 @@ export default function Navbar({ user, onLogout }) {
   };
 
   return (
-    <nav className="bg-white  border-b border-gray-200">
+    <nav className="bg-white border-b border-gray-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
 
@@ -56,12 +66,13 @@ export default function Navbar({ user, onLogout }) {
               </div>
               <div className="flex flex-col">
                 <h1 className="text-2xl font-semibold text-gray-900 pb-1">
-                  Nepali Shram
+                  {text.title}
                 </h1>
-                <span className="text-xs text-gray-500 -mt-1">Applicant Portal</span>
+                <span className="text-xs text-gray-500 -mt-1">
+                  {text.subtitle}
+                </span>
               </div>
             </Link>
-
           </div>
 
           {/* Desktop Navigation */}
@@ -71,7 +82,7 @@ export default function Navbar({ user, onLogout }) {
             <div className="flex items-center bg-gray-50 rounded-lg p-1">
               <button
                 onClick={() => handleLanguageChange('EN')}
-                className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${currentLanguage === 'EN'
+                className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${language === 'EN'
                     ? 'bg-white text-blue-600 shadow-sm'
                     : 'text-gray-600 hover:text-gray-900'
                   }`}
@@ -80,7 +91,7 @@ export default function Navbar({ user, onLogout }) {
               </button>
               <button
                 onClick={() => handleLanguageChange('NP')}
-                className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${currentLanguage === 'NP'
+                className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${language === 'NP'
                     ? 'bg-white text-blue-600 shadow-sm'
                     : 'text-gray-600 hover:text-gray-900'
                   }`}
@@ -136,7 +147,7 @@ export default function Navbar({ user, onLogout }) {
                     className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center space-x-2"
                   >
                     <LogOut className="h-4 w-4" />
-                    <span>Sign out</span>
+                    <span>{text.signOut}</span>
                   </button>
                 </div>
               )}
@@ -177,11 +188,13 @@ export default function Navbar({ user, onLogout }) {
 
             {/* Mobile Language Selector */}
             <div>
-              <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Language</p>
+              <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
+                {text.language}
+              </p>
               <div className="flex space-x-2">
                 <button
                   onClick={() => handleLanguageChange('EN')}
-                  className={`flex-1 py-2 px-4 text-sm font-medium rounded-lg transition-colors ${currentLanguage === 'EN'
+                  className={`flex-1 py-2 px-4 text-sm font-medium rounded-lg transition-colors ${language === 'EN'
                       ? 'bg-blue-600 text-white'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                     }`}
@@ -190,7 +203,7 @@ export default function Navbar({ user, onLogout }) {
                 </button>
                 <button
                   onClick={() => handleLanguageChange('NP')}
-                  className={`flex-1 py-2 px-4 text-sm font-medium rounded-lg transition-colors ${currentLanguage === 'NP'
+                  className={`flex-1 py-2 px-4 text-sm font-medium rounded-lg transition-colors ${language === 'NP'
                       ? 'bg-blue-600 text-white'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                     }`}
@@ -210,7 +223,9 @@ export default function Navbar({ user, onLogout }) {
             >
               <div className="flex items-center space-x-3">
                 <Bell className="h-5 w-5 text-gray-600" />
-                <span className="text-sm font-medium text-gray-700">Notifications</span>
+                <span className="text-sm font-medium text-gray-700">
+                  {text.notifications}
+                </span>
               </div>
               {notifications > 0 && (
                 <span className="bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
@@ -228,7 +243,7 @@ export default function Navbar({ user, onLogout }) {
               className="w-full bg-red-50 hover:bg-red-100 text-red-600 py-3 rounded-lg flex items-center justify-center space-x-2 transition-colors"
             >
               <LogOut className="h-4 w-4" />
-              <span className="text-sm font-medium">Sign out</span>
+              <span className="text-sm font-medium">{text.signOut}</span>
             </button>
           </div>
         </div>

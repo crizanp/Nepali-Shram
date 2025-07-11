@@ -1,0 +1,54 @@
+{
+  "navbar": {
+    "title": "Nepali Shram",
+    "subtitle": "Applicant Portal",
+    "notifications": "Notifications",
+    "signOut": "Sign out",
+    "language": "Language"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome back, {name}. Please click any of this to get started.",
+    "verifyingAuth": "Verifying authentication...",
+    "redirecting": "Redirecting to login..."
+  },
+  "services": {
+    "newApplication": {
+      "title": "New Application",
+      "description": "Start a new application"
+    },
+    "yourStatus": {
+      "title": "Your Status",
+      "description": "Check application status"
+    },
+    "profile": {
+      "title": "Profile",
+      "description": "Manage your profile"
+    },
+    "tutorial": {
+      "title": "Tutorial",
+      "description": "Learn how to use services"
+    },
+    "viewEdit": {
+      "title": "View or Edit",
+      "description": "View or edit applications"
+    },
+    "settings": {
+      "title": "Settings",
+      "description": "Configure your preferences"
+    }
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "save": "Save",
+    "edit": "Edit",
+    "delete": "Delete",
+    "confirm": "Confirm",
+    "back": "Back",
+    "next": "Next",
+    "submit": "Submit"
+  }
+}
