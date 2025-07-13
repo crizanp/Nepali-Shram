@@ -281,7 +281,7 @@ export default function ApplicationsPage() {
               <h3 className="text-lg font-medium text-gray-900 mb-2">{text.noApplicationsFound}</h3>
               <p className="text-gray-600 mb-4">{text.noApplicationsText}</p>
               <button
-                onClick={() => router.push('/apply')}
+                onClick={() => router.push('/portal/new-application')}
                 className="bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 transition-colors"
               >
                 {text.submitFirstApplication}

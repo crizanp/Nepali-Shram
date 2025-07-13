@@ -60,7 +60,7 @@ export default function ServicesContainer() {
       bgColor: 'bg-blue-900',
       iconColor: 'text-green-600',
       description: text.services.yourStatus.description,
-      link: 'application'
+      link: 'status'
     },
     {
       id: 3,
@@ -78,7 +78,7 @@ export default function ServicesContainer() {
       bgColor: 'bg-blue-900',
       iconColor: 'text-yellow-600',
       description: text.services.tutorial.description,
-      link: 'portal/tutorial'
+      link: 'tutorial'
     },
     {
       id: 5,
