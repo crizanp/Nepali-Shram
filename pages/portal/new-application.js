@@ -391,15 +391,15 @@ export default function ApplicationForm() {
         return Object.keys(newErrors).length === 0;
     }, [formData, text.passportFrontRequired, text.laborVisaRequired, text.arrivalRequired, text.agreementRequired, text.passportBackRequired, text.departureRequired]);
     const validateStep3 = useCallback(() => {
-    const newErrors = {};
-    
-    if (!formData.payment_proof) {
-        newErrors.payment_proof = text.paymentProofRequired;  // <- Use the new translation
-    }
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-}, [formData, text.paymentProofRequired]);
+        const newErrors = {};
+
+        if (!formData.payment_proof) {
+            newErrors.payment_proof = text.paymentProofRequired;  // <- Use the new translation
+        }
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    }, [formData, text.paymentProofRequired]);
     // Change validateStep3 to validateStep4
     const validateStep4 = useCallback(() => {
         const newErrors = {};
@@ -610,22 +610,22 @@ export default function ApplicationForm() {
     };
 
     // Get step title
-   const getStepTitle = () => {
-    switch (currentStep) {
-        case 1:
-            return text.personalDetails;
-        case 2:
-            return text.documentUpload;
-        case 3:
-            return text.paymentProof;  // <- Use the new translation
-        case 4:
-            return text.reviewApplication;
-        case 5:
-            return text.termsConditions;
-        default:
-            return text.applicationForm;
-    }
-};
+    const getStepTitle = () => {
+        switch (currentStep) {
+            case 1:
+                return text.personalDetails;
+            case 2:
+                return text.documentUpload;
+            case 3:
+                return text.paymentProof;  // <- Use the new translation
+            case 4:
+                return text.reviewApplication;
+            case 5:
+                return text.termsConditions;
+            default:
+                return text.applicationForm;
+        }
+    };
 
     // Get status display text
     const getStatusText = (status) => {
@@ -744,12 +744,12 @@ export default function ApplicationForm() {
                                             </span>
                                         </div>
                                     </div>
-                                   <div className="mt-4">
-    <p className="text-sm font-medium text-gray-600">{text.submittedOn}</p>
-    <p className="text-gray-900">
-        {new Date(applicationStatus.latestApplication?.submittedAt).toLocaleDateString()}
-    </p>
-</div>
+                                    <div className="mt-4">
+                                        <p className="text-sm font-medium text-gray-600">{text.submittedOn}</p>
+                                        <p className="text-gray-900">
+                                            {new Date(applicationStatus.latestApplication?.submittedAt).toLocaleDateString()}
+                                        </p>
+                                    </div>
 
                                 </div>
 
