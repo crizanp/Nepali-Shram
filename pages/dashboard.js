@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
@@ -85,10 +84,12 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-blue-500 mx-auto mb-4"></div>
-          <p className="text-gray-600">{text.verifyingAuth}</p>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+        <div className="text-center w-full max-w-sm">
+          <div className="animate-spin rounded-full h-12 w-12 sm:h-16 sm:w-16 border-t-4 border-blue-500 mx-auto mb-4"></div>
+          <p className="text-gray-600 text-sm sm:text-base px-4 leading-relaxed">
+            {text.verifyingAuth}
+          </p>
         </div>
       </div>
     );
@@ -96,9 +97,11 @@ export default function Dashboard() {
 
   if (!isAuthenticated || !user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <p className="text-gray-600">{text.redirecting}</p>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+        <div className="text-center w-full max-w-sm">
+          <p className="text-gray-600 text-sm sm:text-base px-4 leading-relaxed">
+            {text.redirecting}
+          </p>
         </div>
       </div>
     );
@@ -109,20 +112,29 @@ export default function Dashboard() {
       <div className="min-h-screen bg-red-50">
         <Head>
           <title>{text.title} | {isNepali ? 'नेपाली श्रम' : 'Nepali Shram'}</title>
+          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         </Head>
         <Navbar user={user} onLogout={handleLogout} />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <header className="mb-8 px-2">
-            <h1 className="text-2xl font-bold text-gray-900">
+        
+        {/* Main content with responsive padding and spacing */}
+        <div className="w-full mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 lg:py-8 max-w-7xl">
+          <header className="mb-6 sm:mb-8 px-1 sm:px-2">
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-2 sm:mb-3 leading-tight">
               {text.title}
             </h1>
-            <p className="text-gray-500 mt-2">
+            <p className="text-gray-500 text-sm sm:text-base leading-relaxed max-w-full break-words">
               {text.welcome(user?.name ? capitalizeWords(user.name) : 'User')}
             </p>
           </header>
-          <ServicesContainer />
+          
+          {/* Services container with responsive wrapper */}
+          <div className="w-full">
+            <ServicesContainer />
+          </div>
         </div>
       </div>
+      
+      {/* Footer */}
       <Footer />
     </>
   );

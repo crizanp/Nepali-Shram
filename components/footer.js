@@ -7,19 +7,19 @@ export default function Footer() {
     const footerLinks = isNepali
         ? [
             { name: 'गोपनीयता नीति', href: '#' },
-            { name: 'प्रयोग कसरी गर्ने', href: '#' },
+            { name: 'प्रयोग कसरी गर्ने', href: '/tutorial' },
             { name: 'सम्झौता', href: '#' },
-            { name: 'हाम्रो बारेमा', href: '#' },
-            { name: 'सम्पर्क गर्नुहोस्', href: '#' },
-            { name: 'मुख्य साइट', href: '#' }
+            { name: 'हाम्रो बारेमा', href: 'https://nepalishram.com/about' },
+            { name: 'सम्पर्क गर्नुहोस्', href: 'https://nepalishram.com#contact' },
+            { name: 'मुख्य साइट', href: 'https://nepalishram.com' }
         ]
         : [
             { name: 'Privacy Policy', href: '#' },
-            { name: 'How to Use', href: '#' },
+            { name: 'How to Use', href: '/tutorial' },
             { name: 'Agreement', href: '#' },
-            { name: 'About Us', href: '#' },
-            { name: 'Contact', href: '#' },
-            { name: 'Main Site', href: '#' }
+            { name: 'About Us', href: 'https://nepalishram.com/about' },
+            { name: 'Contact', href: 'https://nepalishram.com#contact' },
+            { name: 'Main Site', href: 'https://nepalishram.com' }
         ];
 
     return (
@@ -31,7 +31,7 @@ export default function Footer() {
                         {/* Logo Section */}
                         <div className="flex items-center">
                             <Image
-                                src="/NepaliShram.png"
+                                src="/assets/NepaliShram.png"
                                 alt="Nepali Shram Logo"
                                 width={120}
                                 height={40}

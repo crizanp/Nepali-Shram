@@ -78,26 +78,24 @@ const PaymentUpload = ({ formData, errors, onFileChange, onRemoveFile }) => {
     };
 
     return (
-        <div className="space-y-6">
-            <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center">
-                    <CreditCard className="w-6 h-6 text-green-500 mr-2" />
-                    <h2 className="text-xl font-semibold text-gray-900">{text.title}</h2>
+        <div className="space-y-4 p-4 sm:p-6">
+            {/* Header */}
+            <div className="flex items-left justify-left mb-4 sm:mb-6">
+                <div className="flex items-left">
+                    <CreditCard className="w-5 h-5 sm:w-6 sm:h-6 text-green-500 mr-2" />
+                    <h2 className="text-lg sm:text-xl font-semibold text-gray-900 text-left">
+                        {text.title}
+                    </h2>
                 </div>
-                <button
-                    onClick={() => setIsModalOpen(true)}
-                    className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
-                >
-                    <Info className="w-4 h-4 mr-2" />
-                    {text.paymentInfo}
-                </button>
             </div>
             
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                <p className="text-blue-800 text-sm">{text.description}</p>
+            {/* Description */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4 mb-4 sm:mb-6">
+                <p className="text-blue-800 text-sm text-center">{text.description}</p>
             </div>
 
-            <div className="max-w-md mx-auto">
+            {/* File Upload Section */}
+            <div className="w-full max-w-sm mx-auto">
                 <input 
                     type="file" 
                     name="payment_proof" 
@@ -109,7 +107,7 @@ const PaymentUpload = ({ formData, errors, onFileChange, onRemoveFile }) => {
 
                 {formData.payment_proof ? (
                     <div className="relative">
-                        <div className="h-64 rounded-lg overflow-hidden border-2 border-green-300 bg-white">
+                        <div className="h-48 sm:h-64 rounded-lg overflow-hidden border-2 border-green-300 bg-white">
                             {formData.payment_proof.type?.startsWith('image/') ? (
                                 <img
                                     src={formData.payment_proof.base64}
@@ -118,8 +116,8 @@ const PaymentUpload = ({ formData, errors, onFileChange, onRemoveFile }) => {
                                 />
                             ) : (
                                 <div className="w-full h-full flex flex-col items-center justify-center bg-green-100">
-                                    <FileText className="w-16 h-16 text-green-600 mb-2" />
-                                    <p className="text-sm font-medium text-green-800 text-center px-2">
+                                    <FileText className="w-12 h-12 sm:w-16 sm:h-16 text-green-600 mb-2" />
+                                    <p className="text-xs sm:text-sm font-medium text-green-800 text-center px-2">
                                         {formData.payment_proof.name}
                                     </p>
                                     <p className="text-xs text-green-600">PDF Document</p>
@@ -130,7 +128,7 @@ const PaymentUpload = ({ formData, errors, onFileChange, onRemoveFile }) => {
                             </div>
                             <button
                                 onClick={() => onRemoveFile('payment_proof')}
-                                className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white p-1.5 rounded-full"
+                                className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white p-1.5 rounded-full touch-manipulation"
                                 type="button"
                                 title={text.remove}
                             >
@@ -138,10 +136,10 @@ const PaymentUpload = ({ formData, errors, onFileChange, onRemoveFile }) => {
                             </button>
                         </div>
 
-                        <div className="flex gap-2 mt-3">
+                        <div className="flex flex-col sm:flex-row gap-2 mt-3">
                             <button
                                 onClick={() => handleViewDocument(formData.payment_proof, text.paymentProof)}
-                                className="flex-1 inline-flex items-center justify-center px-3 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700"
+                                className="flex-1 inline-flex items-center justify-center px-3 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 touch-manipulation"
                                 type="button"
                             >
                                 <Eye className="w-4 h-4 mr-2" />
@@ -149,7 +147,7 @@ const PaymentUpload = ({ formData, errors, onFileChange, onRemoveFile }) => {
                             </button>
                             <label
                                 htmlFor="payment_proof"
-                                className="flex-1 inline-flex items-center justify-center px-3 py-2 bg-gray-600 text-white rounded-lg text-sm font-medium hover:bg-gray-700 cursor-pointer"
+                                className="flex-1 inline-flex items-center justify-center px-3 py-2 bg-gray-600 text-white rounded-lg text-sm font-medium hover:bg-gray-700 cursor-pointer touch-manipulation"
                             >
                                 <Upload className="w-4 h-4 mr-2" />
                                 {text.replace}
@@ -159,20 +157,31 @@ const PaymentUpload = ({ formData, errors, onFileChange, onRemoveFile }) => {
                 ) : (
                     <label
                         htmlFor="payment_proof"
-                        className="block border-2 border-dashed border-gray-300 rounded-lg p-8 h-64 text-center hover:border-green-400 transition-colors cursor-pointer flex flex-col items-center justify-center"
+                        className="block border-2 border-dashed border-gray-300 rounded-lg p-4 sm:p-8 h-48 sm:h-64 text-center hover:border-green-400 transition-colors cursor-pointer flex flex-col items-center justify-center touch-manipulation"
                     >
-                        <CreditCard className="w-16 h-16 text-gray-400 mb-4" />
-                        <h3 className="text-lg font-bold text-gray-900 mb-2">
+                        <CreditCard className="w-12 h-12 sm:w-16 sm:h-16 text-gray-400 mb-2 sm:mb-4" />
+                        <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-2">
                             {text.paymentProof} <span className="text-red-500">*</span>
                         </h3>
                         <p className="text-sm text-green-600 font-medium">{text.clickToUpload}</p>
-                        <p className="text-xs text-gray-500 mt-2">{text.supported}</p>
+                        <p className="text-xs text-gray-500 mt-2 px-2">{text.supported}</p>
                     </label>
                 )}
 
                 {errors.payment_proof && (
-                    <p className="text-red-500 text-sm mt-2">{errors.payment_proof}</p>
+                    <p className="text-red-500 text-sm mt-2 text-center">{errors.payment_proof}</p>
                 )}
+            </div>
+
+            {/* Payment Information Button - Moved below file upload */}
+            <div className="flex justify-center mt-4 sm:mt-6">
+                <button
+                    onClick={() => setIsModalOpen(true)}
+                    className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors touch-manipulation"
+                >
+                    <Info className="w-4 h-4 mr-2" />
+                    {text.paymentInfo}
+                </button>
             </div>
 
             {/* Payment Modal */}
@@ -184,4 +193,4 @@ const PaymentUpload = ({ formData, errors, onFileChange, onRemoveFile }) => {
     );
 };
 
-export default PaymentUpload;
+export default PaymentUpload

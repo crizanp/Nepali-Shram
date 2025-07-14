@@ -101,7 +101,7 @@ export default function Navbar({ user, onLogout }) {
             </div>
 
             {/* Notification Button */}
-            <button
+            {/* <button
               onClick={handleNotificationClick}
               className="relative p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-50 rounded-lg transition-colors cursor-pointer"
             >
@@ -111,7 +111,7 @@ export default function Navbar({ user, onLogout }) {
                   {notifications > 9 ? '9+' : notifications}
                 </span>
               )}
-            </button>
+            </button> */}
 
             {/* User Menu */}
             <div className="relative">

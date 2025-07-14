@@ -496,8 +496,9 @@ export default function ApplicationForm() {
 
             const result = await response.json();
             console.log('Application submitted successfully:', result);
-
-            alert(`${text.submissionSuccess} ${text.applicationNumberIs} ${result.applicationNumber}`);
+ const applicationNumber = result.applicationNumber || result.application_number || result.id || 'N/A';
+        
+        alert(`${text.submissionSuccess} `);
 
             // Reset form
             setFormData({
@@ -677,8 +678,8 @@ export default function ApplicationForm() {
             <Navbar user={user} onLogout={handleLogout} />
 
             <div className="min-h-screen bg-red-50 py-8">
-                <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="bg-white rounded-lg shadow-lg p-8">
+                <div className="max-w-4xl mx-auto sm:px-4 sm:px-6 lg:px-8">
+                    <div className="bg-white rounded-lg shadow-lg p-4 sm:p-8">
                         {/* Header */}
                         <div className="mb-8">
                             <h1 className="text-3xl font-bold text-gray-900 mb-2">
@@ -705,7 +706,7 @@ export default function ApplicationForm() {
 
                         {/* Application Status Message (when user has pending application) */}
                         {!statusLoading && applicationStatus?.hasApplications && !applicationStatus?.canSubmitNew && (
-                            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 mb-6">
+                            <div className="bg-yellow-50 border border-yellow-200 sm:rounded-lg p-6 mb-6">
                                 <div className="flex items-center mb-4">
                                     <div className="flex-shrink-0">
                                         <svg className="h-8 w-8 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">

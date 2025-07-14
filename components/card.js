@@ -98,7 +98,6 @@ export default function ServicesContainer() {
       description: isNepali ? 'नवीनतम समाचारहरू पढ्नुहोस्' : 'Read the latest news',
       link: 'news'
     }
-
   ];
 
   const handleCardClick = (service) => {
@@ -107,8 +106,9 @@ export default function ServicesContainer() {
   };
 
   return (
-    <div className="">
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+    <div className="w-full">
+      {/* Responsive grid: 2 cols on mobile, 3 on tablet, 4 on desktop */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
         {services.map((service) => {
           const IconComponent = service.icon;
           return (
@@ -119,10 +119,13 @@ export default function ServicesContainer() {
               onMouseLeave={() => setHoveredCard(null)}
               className={`
                 ${service.bgColor}
-                rounded-2xl p-6 cursor-pointer transition-all duration-300 ease-in-out
+                rounded-xl sm:rounded-2xl p-3 sm:p-4 lg:p-6 cursor-pointer 
+                transition-all duration-300 ease-in-out
                 hover:shadow-lg hover:scale-105 hover:-translate-y-1
                 border border-gray-100
                 ${hoveredCard === service.id ? 'shadow-xl' : 'shadow-sm'}
+                min-h-[140px] sm:min-h-[160px] lg:min-h-[200px]
+                flex flex-col justify-center
               `}
               role="button"
               tabIndex={0}
@@ -133,23 +136,27 @@ export default function ServicesContainer() {
                 }
               }}
             >
-              <div className="flex flex-col items-center text-center space-y-4">
+              <div className="flex flex-col items-center text-center space-y-2 sm:space-y-3 lg:space-y-4">
+                {/* Responsive icon container */}
                 <div className={`
-                  w-20 h-20 rounded-full bg-white flex items-center justify-center
+                  w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20 
+                  rounded-full bg-white flex items-center justify-center
                   transition-transform duration-300
                   ${hoveredCard === service.id ? 'scale-110' : 'scale-100'}
                   shadow-sm
                 `}>
                   <IconComponent
-                    className={`w-10 h-10 ${service.iconColor}`}
+                    className={`w-6 h-6 sm:w-8 sm:h-8 lg:w-10 lg:h-10 ${service.iconColor}`}
                   />
                 </div>
 
-                <h3 className="text-2xl font-semibold text-gray-100">
+                {/* Responsive title */}
+                <h3 className="text-sm sm:text-base lg:text-xl xl:text-2xl font-semibold text-gray-100 leading-tight">
                   {service.title}
                 </h3>
 
-                <p className="text-lg text-gray-200 leading-relaxed">
+                {/* Responsive description - hidden on very small screens */}
+                <p className="text-xs sm:text-sm lg:text-base text-gray-200 leading-relaxed hidden sm:block">
                   {service.description}
                 </p>
               </div>
