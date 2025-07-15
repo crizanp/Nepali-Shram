@@ -1,20 +1,30 @@
-import React from 'react';
-import { Upload, FileText, X, Eye } from 'lucide-react';
+import React, { useState } from 'react';
+import { Upload, FileText, X, Eye, AlertCircle } from 'lucide-react';
 import { useTranslation } from '../context/TranslationContext';
 
 const DocumentUpload = ({ formData, errors, onFileChange, onRemoveFile }) => {
     const { isNepali } = useTranslation();
+    const [showSizeModal, setShowSizeModal] = useState(false);
+    const [currentFileName, setCurrentFileName] = useState('');
+    const [currentFileType, setCurrentFileType] = useState('');
 
     const text = {
         title: isNepali ? 'कागजात अपलोड गर्नुहोस्' : 'Document Upload',
         clickToUpload: isNepali ? 'अपलोड गर्न क्लिक गर्नुहोस्' : 'Click to upload',
-        supported: isNepali ? 'समर्थित: PDF, JPG, PNG (अधिकतम 10MB)' : 'Supported: PDF, JPG, PNG (Max 10MB)',
+        supported: isNepali ? 'समर्थित: PDF, JPG, PNG (अधिकतम 2MB)' : 'Supported: PDF, JPG, PNG (Max 2MB)',
         view: isNepali ? 'हेर्नुहोस्' : 'View',
         replace: isNepali ? 'फेरि अपलोड गर्नुहोस्' : 'Replace',
         remove: isNepali ? 'हटाउनुहोस्' : 'Remove',
         notAvailable: isNepali ? 'कागजात हेर्न उपलब्ध छैन' : 'Document not available for viewing',
         popupAlert: isNepali ? 'कागजात हेर्न पपअप अनुमति दिनुहोस्' : 'Please allow popups to view the document',
-        errorOpen: isNepali ? 'कागजात खोल्न त्रुटि भयो। कृपया फेरि प्रयास गर्नुहोस्।' : 'Error opening document. Please try again.'
+        errorOpen: isNepali ? 'कागजात खोल्न त्रुटि भयो। कृपया फेरि प्रयास गर्नुहोस्।' : 'Error opening document. Please try again.',
+        fileSizeError: isNepali ? 'फाइल २MB भन्दा कम हुनुपर्छ' : 'File must be less than 2MB',
+        fileSizeModalTitle: isNepali ? 'फाइल साइज त्रुटि' : 'File Size Error',
+        fileSizeModalMessage: isNepali ? 'चयन गरिएको फाइल २MB भन्दा बढी छ। कृपया फाइल कम्प्रेस गर्नुहोस् र फेरि प्रयास गर्नुहोस्।' : 'The selected file is larger than 2MB. Please compress the file and try again.',
+        compressionLinkPdf: isNepali ? 'PDF कम्प्रेसनको लागि यहाँ क्लिक गर्नुहोस्' : 'Click here for PDF compression',
+        compressionLinkImage: isNepali ? 'इमेज कम्प्रेसनको लागि यहाँ क्लिक गर्नुहोस्' : 'Click here for image compression',
+        close: isNepali ? 'बन्द गर्नुहोस्' : 'Close',
+        fileName: isNepali ? 'फाइल नाम' : 'File Name'
     };
 
     const documentConfig = isNepali
@@ -42,6 +52,27 @@ const DocumentUpload = ({ formData, errors, onFileChange, onRemoveFile }) => {
             { name: 'departure', label: 'Departure', accept: '.pdf,.jpg,.jpeg,.png', required: true },
             { name: 'further_info', label: 'Further Info', accept: '.pdf,.jpg,.jpeg,.png', required: false }
         ];
+
+    const handleFileChange = (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        // Check file size (2MB = 2 * 1024 * 1024 bytes)
+        const maxSize = 2 * 1024 * 1024; // 2MB in bytes
+        if (file.size > maxSize) {
+            // Clear the input
+            event.target.value = '';
+            
+            // Show modal with error message
+            setCurrentFileName(file.name);
+            setCurrentFileType(file.type);
+            setShowSizeModal(true);
+            return;
+        }
+
+        // If file size is OK, proceed with normal file handling
+        onFileChange(event);
+    };
 
     const handleViewDocument = (document, label) => {
         if (!document || !document.base64) {
@@ -97,6 +128,64 @@ const DocumentUpload = ({ formData, errors, onFileChange, onRemoveFile }) => {
         }
     };
 
+    const handleCompressionClick = () => {
+        // Determine compression URL based on file type
+        const compressionUrl = currentFileType === 'application/pdf' 
+            ? 'https://www.ilovepdf.com/compress_pdf'
+            : 'https://nepalishram.com/compression';
+        
+        window.open(compressionUrl, '_blank');
+        setShowSizeModal(false);
+    };
+
+    const getCompressionLinkText = () => {
+        return currentFileType === 'application/pdf' 
+            ? text.compressionLinkPdf 
+            : text.compressionLinkImage;
+    };
+
+    const FileSizeModal = () => {
+        if (!showSizeModal) return null;
+
+        return (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+                    <div className="flex items-center mb-4">
+                        <AlertCircle className="w-6 h-6 text-red-500 mr-2" />
+                        <h3 className="text-lg font-semibold text-gray-900">{text.fileSizeModalTitle}</h3>
+                    </div>
+                    
+                    <div className="mb-4">
+                        <p className="text-sm text-gray-600 mb-2">
+                            <span className="font-medium">{text.fileName}:</span> {currentFileName}
+                        </p>
+                        <p className="text-sm text-gray-800">{text.fileSizeModalMessage}</p>
+                    </div>
+                    
+                    <div className="flex gap-3">
+                        <button
+                            onClick={handleCompressionClick}
+                            className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+                        >
+                            {getCompressionLinkText()}
+                        </button>
+                        <button
+                            onClick={() => setShowSizeModal(false)}
+                            className="flex-1 bg-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-400 transition-colors"
+                        >
+                            {text.close}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
+    const getFileSizeError = (fieldName) => {
+        // Check if there's a file size error for this field
+        return errors[fieldName] && errors[fieldName].includes('2MB');
+    };
+
     return (
         <div className="space-y-6">
             <div className="flex items-center mb-6">
@@ -107,7 +196,14 @@ const DocumentUpload = ({ formData, errors, onFileChange, onRemoveFile }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {documentConfig.map((doc) => (
                     <div key={doc.name} className="relative">
-                        <input type="file" name={doc.name} onChange={onFileChange} accept={doc.accept} className="hidden" id={doc.name} />
+                        <input 
+                            type="file" 
+                            name={doc.name} 
+                            onChange={handleFileChange} 
+                            accept={doc.accept} 
+                            className="hidden" 
+                            id={doc.name} 
+                        />
 
                         {formData[doc.name] ? (
                             <div className="relative">
@@ -174,10 +270,21 @@ const DocumentUpload = ({ formData, errors, onFileChange, onRemoveFile }) => {
                             </label>
                         )}
 
-                        {errors[doc.name] && <p className="text-red-500 text-sm mt-2">{errors[doc.name]}</p>}
+                        {/* Error messages */}
+                        {errors[doc.name] && (
+                            <div className="mt-2">
+                                <p className="text-red-500 text-sm flex items-center gap-1">
+                                    <AlertCircle className="w-4 h-4" />
+                                    {errors[doc.name]}
+                                </p>
+                            </div>
+                        )}
                     </div>
                 ))}
             </div>
+
+            {/* File Size Modal */}
+            <FileSizeModal />
         </div>
     );
 };

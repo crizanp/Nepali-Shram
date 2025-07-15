@@ -213,26 +213,7 @@ export default function Navbar({ user, onLogout }) {
               </div>
             </div>
 
-            {/* Mobile Notification */}
-            <button
-              onClick={() => {
-                handleNotificationClick();
-                setIsMobileMenuOpen(false);
-              }}
-              className="w-full flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg transition-colors"
-            >
-              <div className="flex items-center space-x-3">
-                <Bell className="h-5 w-5 text-gray-600" />
-                <span className="text-sm font-medium text-gray-700">
-                  {text.notifications}
-                </span>
-              </div>
-              {notifications > 0 && (
-                <span className="bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
-                  {notifications > 9 ? '9+' : notifications}
-                </span>
-              )}
-            </button>
+           
 
             {/* Mobile Logout */}
             <button

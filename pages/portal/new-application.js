@@ -53,7 +53,7 @@ export default function ApplicationForm() {
         previous: isNepali ? 'अघिल्लो' : 'Previous',
         next: isNepali ? 'अर्को' : 'Next',
         submitting: isNepali ? 'पेश गर्दै...' : 'Submitting...',
-        submitApplication: isNepali ? 'आवेदन पेश गर्नुहोस्' : 'Submit Application',
+        submitApplication: isNepali ? 'पेश गर्नुहोस्' : 'Submit',
 
         // Step titles
         personalDetails: isNepali ? 'व्यक्तिगत विवरण' : 'Personal Details',
@@ -105,7 +105,7 @@ export default function ApplicationForm() {
         previous: isNepali ? 'अघिल्लो' : 'Previous',
         next: isNepali ? 'अर्को' : 'Next',
         submitting: isNepali ? 'पेश गर्दै...' : 'Submitting...',
-        submitApplication: isNepali ? 'आवेदन पेश गर्नुहोस्' : 'Submit Application',
+        submitApplication: isNepali ? 'पेश गर्नुहोस्' : 'Submit',
 
         // Additional status text:
         submittedOn: isNepali ? 'पेश गरिएको मिति' : 'Submitted On',
@@ -496,9 +496,9 @@ export default function ApplicationForm() {
 
             const result = await response.json();
             console.log('Application submitted successfully:', result);
- const applicationNumber = result.applicationNumber || result.application_number || result.id || 'N/A';
-        
-        alert(`${text.submissionSuccess} `);
+            const applicationNumber = result.applicationNumber || result.application_number || result.id || 'N/A';
+
+            alert(`${text.submissionSuccess} `);
 
             // Reset form
             setFormData({
@@ -682,7 +682,7 @@ export default function ApplicationForm() {
                     <div className="bg-white rounded-lg shadow-lg p-4 sm:p-8">
                         {/* Header */}
                         <div className="mb-8">
-                            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                            <h1 className="text-2xl font-bold text-gray-900 mb-2">
                                 {applicationStatus?.hasApplications && !applicationStatus?.canSubmitNew
                                     ? text.applicationStatus
                                     : text.newApplication
@@ -703,28 +703,23 @@ export default function ApplicationForm() {
                                 <p className="text-gray-600">{text.checkingStatus}</p>
                             </div>
                         )}
-
                         {/* Application Status Message (when user has pending application) */}
                         {!statusLoading && applicationStatus?.hasApplications && !applicationStatus?.canSubmitNew && (
-                            <div className="bg-yellow-50 border border-yellow-200 sm:rounded-lg p-6 mb-6">
-                                <div className="flex items-center mb-4">
+                            <div className="bg-yellow-50 border border-yellow-200 sm:rounded-lg p-4 sm:p-6 mb-6">
+                                <div className="flex flex-col sm:flex-row sm:items-start gap-4 mb-4">
                                     <div className="flex-shrink-0">
                                         <svg className="h-8 w-8 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                         </svg>
                                     </div>
-                                    <div className="ml-3">
-                                        <h3 className="text-lg font-medium text-yellow-800">
-                                            {text.applicationSubmitted}
-                                        </h3>
-                                        <p className="text-yellow-700 mt-1">
-                                            {text.waitForApproval}
-                                        </p>
+                                    <div>
+                                        <h3 className="text-lg font-medium text-yellow-800">{text.applicationSubmitted}</h3>
+                                        <p className="text-yellow-700 mt-1">{text.waitForApproval}</p>
                                     </div>
                                 </div>
 
                                 <div className="bg-white rounded-lg p-4 mb-4">
-                                    <div className="grid grid-cols-2 gap-4">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                         <div>
                                             <p className="text-sm font-medium text-gray-600">{text.applicationNumber}</p>
                                             <p className="text-lg font-semibold text-gray-900">
@@ -734,37 +729,37 @@ export default function ApplicationForm() {
                                         <div>
                                             <p className="text-sm font-medium text-gray-600">{text.status}</p>
                                             <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${applicationStatus.latestApplication?.status === 'submitted'
-                                                ? 'bg-blue-100 text-blue-800'
-                                                : applicationStatus.latestApplication?.status === 'under_review'
-                                                    ? 'bg-yellow-100 text-yellow-800'
-                                                    : applicationStatus.latestApplication?.status === 'pending_documents'
-                                                        ? 'bg-orange-100 text-orange-800'
-                                                        : 'bg-red-100 text-red-800'
+                                                    ? 'bg-blue-100 text-blue-800'
+                                                    : applicationStatus.latestApplication?.status === 'under_review'
+                                                        ? 'bg-yellow-100 text-yellow-800'
+                                                        : applicationStatus.latestApplication?.status === 'pending_documents'
+                                                            ? 'bg-orange-100 text-orange-800'
+                                                            : 'bg-red-100 text-red-800'
                                                 }`}>
                                                 {applicationStatus.latestApplication?.status?.replace('_', ' ').toUpperCase()}
                                             </span>
                                         </div>
                                     </div>
+
                                     <div className="mt-4">
                                         <p className="text-sm font-medium text-gray-600">{text.submittedOn}</p>
                                         <p className="text-gray-900">
                                             {new Date(applicationStatus.latestApplication?.submittedAt).toLocaleDateString()}
                                         </p>
                                     </div>
-
                                 </div>
 
-                                <div className="flex space-x-4">
+                                <div className="flex flex-col sm:flex-row gap-4">
                                     <button
                                         onClick={() => router.push('/application')}
-                                        className="inline-flex cursor-pointer items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                                        className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                                     >
                                         {text.viewApplication}
                                     </button>
                                     {applicationStatus.canEdit && (
                                         <button
                                             onClick={() => router.push(`/applications/${applicationStatus.latestApplication?.id}/edit`)}
-                                            className="inline-flex cursor-pointer  items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                                            className="inline-flex items-center justify-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                                         >
                                             {text.editApplication}
                                         </button>
@@ -772,6 +767,7 @@ export default function ApplicationForm() {
                                 </div>
                             </div>
                         )}
+
 
                         {/* Regular Form (when user can submit new application) */}
                         {!statusLoading && (applicationStatus?.canSubmitNew || !applicationStatus?.hasApplications) && (

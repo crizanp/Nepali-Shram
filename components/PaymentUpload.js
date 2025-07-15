@@ -1,17 +1,20 @@
 import React, { useState } from 'react';
-import { Upload, FileText, X, Eye, CreditCard, Info } from 'lucide-react';
+import { Upload, FileText, X, Eye, CreditCard, Info, AlertCircle } from 'lucide-react';
 import { useTranslation } from '../context/TranslationContext';
 import PaymentModal from './PaymentModal';
 
 const PaymentUpload = ({ formData, errors, onFileChange, onRemoveFile }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [showSizeModal, setShowSizeModal] = useState(false);
+    const [currentFileName, setCurrentFileName] = useState('');
+    const [currentFileType, setCurrentFileType] = useState('');
     const { isNepali } = useTranslation();
 
     const text = {
         title: isNepali ? 'भुक्तानी प्रमाण अपलोड गर्नुहोस्' : 'Upload Payment Proof',
         description: isNepali ? 'कृपया भुक्तानी रसिद वा स्क्रिनसट अपलोड गर्नुहोस्' : 'Please upload payment receipt or screenshot',
         clickToUpload: isNepali ? 'अपलोड गर्न क्लिक गर्नुहोस्' : 'Click to upload',
-        supported: isNepali ? 'समर्थित: PDF, JPG, PNG (अधिकतम 10MB)' : 'Supported: PDF, JPG, PNG (Max 10MB)',
+        supported: isNepali ? 'समर्थित: PDF, JPG, PNG (अधिकतम 2MB)' : 'Supported: PDF, JPG, PNG (Max 2MB)',
         view: isNepali ? 'हेर्नुहोस्' : 'View',
         replace: isNepali ? 'फेरि अपलोड गर्नुहोस्' : 'Replace',
         remove: isNepali ? 'हटाउनुहोस्' : 'Remove',
@@ -20,7 +23,35 @@ const PaymentUpload = ({ formData, errors, onFileChange, onRemoveFile }) => {
         errorOpen: isNepali ? 'कागजात खोल्न त्रुटि भयो। कृपया फेरि प्रयास गर्नुहोस्।' : 'Error opening document. Please try again.',
         paymentProof: isNepali ? 'भुक्तानी प्रमाण' : 'Payment Proof',
         required: isNepali ? 'आवश्यक' : 'Required',
-        paymentInfo: isNepali ? 'भुक्तानी जानकारी हेर्नुहोस्' : 'View Payment Information'
+        paymentInfo: isNepali ? 'भुक्तानी जानकारी हेर्नुहोस्' : 'View Payment Information',
+        fileSizeError: isNepali ? 'फाइल २MB भन्दा कम हुनुपर्छ' : 'File must be less than 2MB',
+        fileSizeModalTitle: isNepali ? 'फाइल साइज त्रुटि' : 'File Size Error',
+        fileSizeModalMessage: isNepali ? 'चयन गरिएको फाइल २MB भन्दा बढी छ। कृपया फाइल कम्प्रेस गर्नुहोस् र फेरि प्रयास गर्नुहोस्।' : 'The selected file is larger than 2MB. Please compress the file and try again.',
+        compressionLinkPdf: isNepali ? 'PDF कम्प्रेसनको लागि यहाँ क्लिक गर्नुहोस्' : 'Click here for PDF compression',
+        compressionLinkImage: isNepali ? 'इमेज कम्प्रेसनको लागि यहाँ क्लिक गर्नुहोस्' : 'Click here for image compression',
+        close: isNepali ? 'बन्द गर्नुहोस्' : 'Close',
+        fileName: isNepali ? 'फाइल नाम' : 'File Name'
+    };
+
+    const handleFileChange = (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        // Check file size (2MB = 2 * 1024 * 1024 bytes)
+        const maxSize = 2 * 1024 * 1024; // 2MB in bytes
+        if (file.size > maxSize) {
+            // Clear the input
+            event.target.value = '';
+            
+            // Show modal with error message
+            setCurrentFileName(file.name);
+            setCurrentFileType(file.type);
+            setShowSizeModal(true);
+            return;
+        }
+
+        // If file size is OK, proceed with normal file handling
+        onFileChange(event);
     };
 
     const handleViewDocument = (document, label) => {
@@ -77,6 +108,59 @@ const PaymentUpload = ({ formData, errors, onFileChange, onRemoveFile }) => {
         }
     };
 
+    const handleCompressionClick = () => {
+        // Determine compression URL based on file type
+        const compressionUrl = currentFileType === 'application/pdf' 
+            ? 'https://www.ilovepdf.com/compress_pdf'
+            : 'https://nepalishram.com/compression';
+        
+        window.open(compressionUrl, '_blank');
+        setShowSizeModal(false);
+    };
+
+    const getCompressionLinkText = () => {
+        return currentFileType === 'application/pdf' 
+            ? text.compressionLinkPdf 
+            : text.compressionLinkImage;
+    };
+
+    const FileSizeModal = () => {
+        if (!showSizeModal) return null;
+
+        return (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+                    <div className="flex items-center mb-4">
+                        <AlertCircle className="w-6 h-6 text-red-500 mr-2" />
+                        <h3 className="text-lg font-semibold text-gray-900">{text.fileSizeModalTitle}</h3>
+                    </div>
+                    
+                    <div className="mb-4">
+                        <p className="text-sm text-gray-600 mb-2">
+                            <span className="font-medium">{text.fileName}:</span> {currentFileName}
+                        </p>
+                        <p className="text-sm text-gray-800">{text.fileSizeModalMessage}</p>
+                    </div>
+                    
+                    <div className="flex gap-3">
+                        <button
+                            onClick={handleCompressionClick}
+                            className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+                        >
+                            {getCompressionLinkText()}
+                        </button>
+                        <button
+                            onClick={() => setShowSizeModal(false)}
+                            className="flex-1 bg-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-400 transition-colors"
+                        >
+                            {text.close}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
     return (
         <div className="space-y-4 p-4 sm:p-6">
             {/* Header */}
@@ -99,7 +183,7 @@ const PaymentUpload = ({ formData, errors, onFileChange, onRemoveFile }) => {
                 <input 
                     type="file" 
                     name="payment_proof" 
-                    onChange={onFileChange} 
+                    onChange={handleFileChange} 
                     accept=".pdf,.jpg,.jpeg,.png" 
                     className="hidden" 
                     id="payment_proof" 
@@ -168,8 +252,14 @@ const PaymentUpload = ({ formData, errors, onFileChange, onRemoveFile }) => {
                     </label>
                 )}
 
+                {/* Error messages */}
                 {errors.payment_proof && (
-                    <p className="text-red-500 text-sm mt-2 text-center">{errors.payment_proof}</p>
+                    <div className="mt-2">
+                        <p className="text-red-500 text-sm flex items-center gap-1 justify-center">
+                            <AlertCircle className="w-4 h-4" />
+                            {errors.payment_proof}
+                        </p>
+                    </div>
                 )}
             </div>
 
@@ -189,8 +279,11 @@ const PaymentUpload = ({ formData, errors, onFileChange, onRemoveFile }) => {
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
             />
+
+            {/* File Size Modal */}
+            <FileSizeModal />
         </div>
     );
 };
 
-export default PaymentUpload
+export default PaymentUpload;
