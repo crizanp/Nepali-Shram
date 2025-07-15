@@ -31,7 +31,7 @@ export default function Footer() {
                         {/* Logo Section */}
                         <div className="flex items-center">
                             <Image
-                                src="/assets/NepaliShram.png"
+                                src="https://portal.nepalishram.com/assets/Nepalishram.png"
                                 alt="Nepali Shram Logo"
                                 width={120}
                                 height={40}
