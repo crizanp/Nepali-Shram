@@ -43,10 +43,7 @@ export default function Signup() {
 
   const validatePassword = (password) => {
     if (!password) return 'Password is required';
-    if (password.length < 8) return 'Password must be at least 8 characters';
-    if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(password)) {
-      return 'Password must contain at least one uppercase letter, one lowercase letter, and one number';
-    }
+    if (password.length < 6) return 'Password must be at least 6 characters';
     return '';
   };
 
@@ -125,7 +122,7 @@ export default function Signup() {
 
     try {
       console.log('Attempting to resend verification email to:', email);
-      
+
       // Call the resend verification API endpoint
       const response = await fetch('/api/auth/resend-verification-email', {
         method: 'POST',
@@ -161,13 +158,13 @@ export default function Signup() {
   if (emailSent) {
     return (
       <>
-        <div className="min-h-screen flex flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8"
+        <div className="min-h-screen flex flex-col items-center justify-center py-12 px-0 sm:px-6 lg:px-8"
           style={{
             background: 'linear-gradient(135deg, #003479 0%, #0054a6 40%, rgb(144, 180, 255) 70%, rgb(173, 199, 255) 100%)'
           }}>
 
           {/* Verification Card */}
-          <div className="bg-white rounded-xl shadow-2xl p-8 w-full max-w-xl">
+          <div className="bg-white rounded-xl shadow-2xl p-4 w-full max-w-xl">
             <div className="mb-4">
               {/* Gradient Border Wrapper */}
               <div className="w-40 h-40 mx-auto p-1 rounded-3xl"
@@ -179,7 +176,7 @@ export default function Signup() {
                 {/* Inner white box */}
                 <div className="w-full h-full bg-white rounded-3xl shadow-lg flex items-center justify-center">
                   <img
-                    src="/Nepalishram.png"
+                    src="/assets/Nepalishram.png"
                     alt="Logo"
                     className="w-32 h-32 object-contain"
                   />
@@ -193,7 +190,7 @@ export default function Signup() {
                 We have sent a verification link to <strong>{email}</strong>.
                 Please check your inbox and click the link to verify your account.
               </p>
-              
+
               {/* Show success message if resend was successful */}
               {resendMessage && (
                 <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-4">
@@ -238,13 +235,13 @@ export default function Signup() {
 
   return (
     <>
-      <div className="min-h-screen flex flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8"
+      <div className="min-h-screen flex flex-col items-center justify-center py-12 px-0 sm:px-6 lg:px-8"
         style={{
           background: 'linear-gradient(135deg, #003479 0%, #0054a6 40%, rgb(144, 180, 255) 70%, rgb(173, 199, 255) 100%)'
         }}>
 
         {/* Signup Card */}
-        <div className="bg-white rounded-xl shadow-2xl p-8 w-full max-w-xl">
+        <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-xl">
           <div className="mb-4">
             {/* Gradient Border Wrapper */}
             <div className="w-40 h-40 mx-auto p-1 rounded-3xl"
@@ -256,7 +253,7 @@ export default function Signup() {
               {/* Inner white box */}
               <div className="w-full h-full bg-white rounded-3xl shadow-lg flex items-center justify-center">
                 <img
-                  src="/Nepalishram.png"
+                  src="/assets//Nepalishram.png"
                   alt="Logo"
                   className="w-32 h-32 object-contain"
                 />
@@ -273,7 +270,7 @@ export default function Signup() {
               </Link>
             </p>
           </div>
-          
+
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4" role="alert">
               <span className="block sm:inline">{error}</span>
@@ -439,13 +436,7 @@ export default function Signup() {
 
           {/* Password Requirements */}
           <div className="mt-4 text-xs text-gray-500">
-            <p className="mb-1">Password must contain:</p>
-            <ul className="list-disc list-inside space-y-1">
-              <li>At least 8 characters</li>
-              <li>One uppercase letter</li>
-              <li>One lowercase letter</li>
-              <li>One number</li>
-            </ul>
+            <p className="mb-1">Password must contain at least 6 characters</p>
           </div>
         </div>
       </div>

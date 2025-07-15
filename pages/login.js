@@ -33,7 +33,7 @@ export default function Login() {
     } catch (err) {
       const errorMessage = err.message || 'An error occurred during login';
       setError(errorMessage);
-      
+
       // Check if the error is about unverified email
       if (errorMessage.includes('verify your email')) {
         setUnverifiedEmail(email);
@@ -79,7 +79,7 @@ export default function Login() {
 
   return (
     <>
-      <div className="min-h-screen flex flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8"
+      <div className="min-h-screen flex flex-col items-center justify-center py-12 px-0 sm:px-6 lg:px-8"
         style={{
           background: 'linear-gradient(135deg, #003479 0%, #0054a6 40%, rgb(144, 180, 255) 70%, rgb(173, 199, 255) 100%)'
         }}>
@@ -97,7 +97,7 @@ export default function Login() {
               {/* Inner white box */}
               <div className="w-full h-full bg-white rounded-3xl shadow-lg flex items-center justify-center">
                 <img
-                  src="/Nepalishram.png"
+                  src="/assets/Nepalishram.png"
                   alt="Logo"
                   className="w-32 h-32 object-contain"
                 />
@@ -203,27 +203,26 @@ export default function Login() {
             </div>
 
             {/* Remember Me and Forgot Password */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
+            <div className="flex items-center justify-between flex-wrap gap-2 text-sm">
+              <label htmlFor="remember-me" className="flex items-center cursor-pointer text-gray-900">
                 <input
                   id="remember-me"
                   name="remember-me"
                   type="checkbox"
-                  className="h-4 w-4 border-gray-300 rounded cursor-pointer"
+                  className="h-4 w-4 border-gray-300 rounded mr-2 cursor-pointer"
                   style={{ accentColor: '#003479' }}
                   checked={rememberMe}
                   onChange={(e) => setRememberMe(e.target.checked)}
                 />
-                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900 cursor-pointer">
-                  Remember me
-                </label>
-              </div>
+                Remember me
+              </label>
 
-              <div className="text-sm">
-                <Link href="/forgot-password" className="font-medium hover:underline cursor-pointer transition-colors duration-200" style={{ color: '#003479' }}>
-                  Forgot your password?
-                </Link>
-              </div>
+              <Link
+                href="/forgot-password"
+                className="text-[#003479] font-medium hover:underline transition-colors duration-200"
+              >
+                Forgot your password?
+              </Link>
             </div>
 
             {/* Sign In Button */}
@@ -257,7 +256,7 @@ export default function Login() {
             <div className="mt-6 pt-4 border-t border-gray-200 text-center">
               <p className="text-sm text-gray-600">
                 Having trouble with email verification?{' '}
-                <Link 
+                <Link
                   href={`/verify-email?email=${encodeURIComponent(unverifiedEmail)}`}
                   className="font-medium hover:underline cursor-pointer transition-colors duration-200"
                   style={{ color: '#003479' }}

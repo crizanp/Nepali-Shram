@@ -223,7 +223,7 @@ export default function VerifyEmail() {
                 ) : (
                   <>
                     <Mail className="h-5 w-5" />
-                    <span>SEND VERIFICATION EMAIL</span>
+                    <span  className='text-sm'>SEND VERIFICATION EMAIL</span>
                   </>
                 )}
               </button>
@@ -254,13 +254,13 @@ export default function VerifyEmail() {
         <meta name="description" content="Verify your email address to complete your account setup." />
       </Head>
       
-      <div className="min-h-screen flex flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8"
+      <div className="min-h-screen flex flex-col items-center justify-center py-12 px-0 sm:px-6 lg:px-8"
         style={{
           background: 'linear-gradient(135deg, #003479 0%, #0054a6 40%, rgb(144, 180, 255) 70%, rgb(173, 199, 255) 100%)'
         }}>
 
         {/* Verification Card */}
-        <div className="bg-white rounded-xl shadow-2xl p-8 w-full max-w-xl">
+        <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-xl">
           <div className="mb-6">
             {/* Gradient Border Wrapper */}
             <div className="w-40 h-40 mx-auto p-1 rounded-3xl"
@@ -272,7 +272,7 @@ export default function VerifyEmail() {
               {/* Inner white box */}
               <div className="w-full h-full bg-white rounded-3xl shadow-lg flex items-center justify-center">
                 <img
-                  src="/Nepalishram.png"
+                  src="/assets/Nepalishram.png"
                   alt="Logo"
                   className="w-32 h-32 object-contain"
                 />
