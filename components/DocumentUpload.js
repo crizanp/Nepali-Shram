@@ -132,7 +132,7 @@ const DocumentUpload = ({ formData, errors, onFileChange, onRemoveFile }) => {
         // Determine compression URL based on file type
         const compressionUrl = currentFileType === 'application/pdf' 
             ? 'https://www.ilovepdf.com/compress_pdf'
-            : 'https://nepalishram.com/compression';
+            : 'https://nepalishram.com/image-compression';
         
         window.open(compressionUrl, '_blank');
         setShowSizeModal(false);
