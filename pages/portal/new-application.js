@@ -1,16 +1,13 @@
+//portal/new-application.js
+
 import { useState, useEffect, useCallback } from 'react';
 import { ArrowRight, ArrowLeft, CheckCircle } from 'lucide-react';
 import { useRouter } from 'next/router';
 import Navbar from '@/components/navbar';
 import Footer from '@/components/footer';
-import ProgressIndicator from '@/components/ProgressIndicator';
-import UserDetailsForm from '@/components/UserDetailsForm';
-import DocumentUpload from '@/components/DocumentUpload';
-import ApplicationReview from '@/components/ApplicationReview';
-import AgreementForm from '@/components/AgreementForm';
 import { useTranslation } from '@/context/TranslationContext';
-import PaymentUpload from '@/components/PaymentUpload';
-
+import ApplicationStatusDisplay from '@/components/ApplicationStatusDisplay';
+import ApplicationFormDisplay from '@/components/ApplicationFormDisplay';
 export default function ApplicationForm() {
     const { isNepali } = useTranslation();
     const [currentStep, setCurrentStep] = useState(1);
@@ -124,6 +121,9 @@ export default function ApplicationForm() {
         phone: '',
         whatsappNumber: '', // Optional field
         passportNumber: '',
+        // Add these two lines for document upload selections
+        applicationMode: '',
+        passportType: '',
 
         // Step 2: Documents - Keep as is
         payment_proof: null,
@@ -377,19 +377,56 @@ export default function ApplicationForm() {
     }, [formData, text.fullNameRequired, text.emailRequired, text.emailInvalid, text.phoneRequired, text.passportRequired]);
 
     const validateStep2 = useCallback(() => {
+        // Get the DocumentUpload component's validation function
+        const documentUploadElement = document.querySelector('[data-document-upload]');
+        if (documentUploadElement && documentUploadElement._validateDocuments) {
+            return documentUploadElement._validateDocuments();
+        }
+
+        // Fallback validation - check required documents based on current settings
         const newErrors = {};
 
-        // Required documents
-        if (!formData.passport_front) newErrors.passport_front = text.passportFrontRequired;
-        if (!formData.labor_visa_front) newErrors.labor_visa_front = text.laborVisaRequired;
-        if (!formData.arrival) newErrors.arrival = text.arrivalRequired;
-        if (!formData.agreement_paper) newErrors.agreement_paper = text.agreementRequired;
-        if (!formData.passport_back) newErrors.passport_back = text.passportBackRequired;
-        if (!formData.departure) newErrors.departure = text.departureRequired;
+        // Get current application mode and passport type from DocumentUpload state
+        // Since we can't directly access the state, we'll check the radio buttons
+        const applicationModeElement = document.querySelector('input[name="applicationMode"]:checked');
+        const passportTypeElement = document.querySelector('input[name="passportType"]:checked');
+
+        const applicationMode = applicationModeElement ? applicationModeElement.value : 'new';
+        const passportType = passportTypeElement ? passportTypeElement.value : 'green';
+
+        // Check required documents based on mode and type
+        if (!formData.passport_front) {
+            newErrors.passport_front = text.passportFrontRequired;
+        }
+        if (!formData.valid_visa) {
+            newErrors.valid_visa = text.laborVisaRequired;
+        }
+
+        if (applicationMode === 'new') {
+            if (!formData.agreement_paper) {
+                newErrors.agreement_paper = text.agreementRequired;
+            }
+            if (passportType === 'green' && !formData.passport_back) {
+                newErrors.passport_back = text.passportBackRequired;
+            }
+        } else if (applicationMode === 'renew') {
+            if (!formData.labor_visa_front) {
+                newErrors.labor_visa_front = text.laborVisaRequired;
+            }
+            if (!formData.labor_visa_back) {
+                newErrors.labor_visa_back = text.laborVisaRequired;
+            }
+            if (!formData.arrival) {
+                newErrors.arrival = text.arrivalRequired;
+            }
+            if (passportType === 'green' && !formData.passport_back) {
+                newErrors.passport_back = text.passportBackRequired;
+            }
+        }
 
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
-    }, [formData, text.passportFrontRequired, text.laborVisaRequired, text.arrivalRequired, text.agreementRequired, text.passportBackRequired, text.departureRequired]);
+    }, [formData, text]);
     const validateStep3 = useCallback(() => {
         const newErrors = {};
 
@@ -558,90 +595,6 @@ export default function ApplicationForm() {
         }
     }, [errors]);
 
-    // Render current step component
-    const renderCurrentStep = () => {
-        switch (currentStep) {
-            case 1:
-                return (
-                    <UserDetailsForm
-                        formData={formData}
-                        errors={errors}
-                        onInputChange={handleInputChange}
-                        userEmail={user?.email}
-                    />
-                );
-            case 2:
-                return (
-                    <DocumentUpload
-                        formData={formData}
-                        errors={errors}
-                        onFileChange={handleFileChange}
-                        onRemoveFile={handleRemoveFile}
-                    />
-                );
-            case 3:
-                return (
-                    <PaymentUpload  // Add this new case
-                        formData={formData}
-                        errors={errors}
-                        onFileChange={handleFileChange}
-                        onRemoveFile={handleRemoveFile}
-                    />
-                );
-            case 4:
-                return (
-                    <ApplicationReview
-                        formData={formData}
-                        onGoToStep={goToStep}
-                    />
-                );
-            case 5:
-                return (
-                    <AgreementForm
-                        formData={formData}
-                        errors={errors}
-                        onUpdate={updateFormData}
-                        onErrorsUpdate={updateErrors}
-                        onInputChange={handleInputChange}
-                    />
-                );
-            default:
-                return null;
-        }
-    };
-
-    // Get step title
-    const getStepTitle = () => {
-        switch (currentStep) {
-            case 1:
-                return text.personalDetails;
-            case 2:
-                return text.documentUpload;
-            case 3:
-                return text.paymentProof;  // <- Use the new translation
-            case 4:
-                return text.reviewApplication;
-            case 5:
-                return text.termsConditions;
-            default:
-                return text.applicationForm;
-        }
-    };
-
-    // Get status display text
-    const getStatusText = (status) => {
-        switch (status) {
-            case 'submitted':
-                return text.submitted;
-            case 'under_review':
-                return text.underReview;
-            case 'pending_documents':
-                return text.pendingDocuments;
-            default:
-                return status?.replace('_', ' ').toUpperCase();
-        }
-    };
-
     // Loading screen
     if (loading) {
         return (
@@ -672,7 +625,6 @@ export default function ApplicationForm() {
             </>
         );
     }
-
     return (
         <>
             <Navbar user={user} onLogout={handleLogout} />
@@ -705,129 +657,32 @@ export default function ApplicationForm() {
                         )}
                         {/* Application Status Message (when user has pending application) */}
                         {!statusLoading && applicationStatus?.hasApplications && !applicationStatus?.canSubmitNew && (
-                            <div className="bg-yellow-50 border border-yellow-200 sm:rounded-lg p-4 sm:p-6 mb-6">
-                                <div className="flex flex-col sm:flex-row sm:items-start gap-4 mb-4">
-                                    <div className="flex-shrink-0">
-                                        <svg className="h-8 w-8 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <h3 className="text-lg font-medium text-yellow-800">{text.applicationSubmitted}</h3>
-                                        <p className="text-yellow-700 mt-1">{text.waitForApproval}</p>
-                                    </div>
-                                </div>
-
-                                <div className="bg-white rounded-lg p-4 mb-4">
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                        <div>
-                                            <p className="text-sm font-medium text-gray-600">{text.applicationNumber}</p>
-                                            <p className="text-lg font-semibold text-gray-900">
-                                                {applicationStatus.latestApplication?.applicationNumber}
-                                            </p>
-                                        </div>
-                                        <div>
-                                            <p className="text-sm font-medium text-gray-600">{text.status}</p>
-                                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${applicationStatus.latestApplication?.status === 'submitted'
-                                                    ? 'bg-blue-100 text-blue-800'
-                                                    : applicationStatus.latestApplication?.status === 'under_review'
-                                                        ? 'bg-yellow-100 text-yellow-800'
-                                                        : applicationStatus.latestApplication?.status === 'pending_documents'
-                                                            ? 'bg-orange-100 text-orange-800'
-                                                            : 'bg-red-100 text-red-800'
-                                                }`}>
-                                                {applicationStatus.latestApplication?.status?.replace('_', ' ').toUpperCase()}
-                                            </span>
-                                        </div>
-                                    </div>
-
-                                    <div className="mt-4">
-                                        <p className="text-sm font-medium text-gray-600">{text.submittedOn}</p>
-                                        <p className="text-gray-900">
-                                            {new Date(applicationStatus.latestApplication?.submittedAt).toLocaleDateString()}
-                                        </p>
-                                    </div>
-                                </div>
-
-                                <div className="flex flex-col sm:flex-row gap-4">
-                                    <button
-                                        onClick={() => router.push('/application')}
-                                        className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                                    >
-                                        {text.viewApplication}
-                                    </button>
-                                    {applicationStatus.canEdit && (
-                                        <button
-                                            onClick={() => router.push(`/applications/${applicationStatus.latestApplication?.id}/edit`)}
-                                            className="inline-flex items-center justify-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                                        >
-                                            {text.editApplication}
-                                        </button>
-                                    )}
-                                </div>
-                            </div>
+                            <ApplicationStatusDisplay
+                                applicationStatus={applicationStatus}
+                                text={text}
+                            />
                         )}
 
 
                         {/* Regular Form (when user can submit new application) */}
                         {!statusLoading && (applicationStatus?.canSubmitNew || !applicationStatus?.hasApplications) && (
-                            <>
-                                {/* Progress Indicator */}
-                                <ProgressIndicator currentStep={currentStep} />
-
-                                {/* Current Step Content */}
-                                <div className="mb-8">
-                                    {renderCurrentStep()}
-                                </div>
-
-                                {/* Navigation Buttons */}
-                                <div className="flex justify-between items-center pt-6 border-t border-gray-200">
-                                    <button
-                                        onClick={handlePrevious}
-                                        disabled={currentStep === 1}
-                                        className={`inline-flex items-center px-6 py-3 border border-gray-300 rounded-md text-sm font-medium transition-colors ${currentStep === 1
-                                            ? 'text-gray-400 cursor-not-allowed bg-gray-100'
-                                            : 'text-gray-700 cursor-pointer bg-white hover:bg-gray-50 hover:border-gray-400'
-                                            }`}
-                                    >
-                                        <ArrowLeft className="w-4 h-4 mr-2" />
-                                        {text.previous}
-                                    </button>
-
-                                    <div className="flex items-center space-x-4">
-                                        {currentStep < 5 ? (
-                                            <button
-                                                onClick={handleNext}
-                                                className="inline-flex items-center cursor-pointer px-6 py-3 border border-transparent rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors shadow-sm"
-                                            >
-                                                {text.next}
-                                                <ArrowRight className="w-4 h-4 ml-2" />
-                                            </button>
-                                        ) : (
-                                            <button
-                                                onClick={handleSubmit}
-                                                disabled={submitting}
-                                                className={`inline-flex items-center px-6 py-3 border border-transparent rounded-md text-sm font-medium text-white transition-colors shadow-sm ${submitting
-                                                    ? 'bg-gray-400 cursor-not-allowed'
-                                                    : 'bg-green-600 hover:bg-green-700 cursor-pointer'
-                                                    }`}
-                                            >
-                                                {submitting ? (
-                                                    <>
-                                                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                                                        {text.submitting}
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <CheckCircle className="w-4 h-4 mr-2" />
-                                                        {text.submitApplication}
-                                                    </>
-                                                )}
-                                            </button>
-                                        )}
-                                    </div>
-                                </div>
-                            </>
+                            <ApplicationFormDisplay
+                                currentStep={currentStep}
+                                formData={formData}
+                                errors={errors}
+                                submitting={submitting}
+                                text={text}
+                                user={user}
+                                handleInputChange={handleInputChange}
+                                handleFileChange={handleFileChange}
+                                handleRemoveFile={handleRemoveFile}
+                                goToStep={goToStep}
+                                updateFormData={updateFormData}
+                                updateErrors={updateErrors}
+                                handleNext={handleNext}
+                                handlePrevious={handlePrevious}
+                                handleSubmit={handleSubmit}
+                            />
                         )}
                     </div>
                 </div>

@@ -317,11 +317,6 @@ export default function EditApplication() {
         // Check required documents
         const requiredDocuments = [
             'passport_front',
-            'labor_visa_front',
-            'arrival',
-            'agreement_paper',
-            'passport_back',
-            'departure',
             'payment_proof'
         ];
 

@@ -1,15 +1,24 @@
-import React, { useState } from 'react';
+// components/DocumentUpload.js
+
+import React, { useState, useCallback, useEffect } from 'react';
 import { Upload, FileText, X, Eye, AlertCircle } from 'lucide-react';
 import { useTranslation } from '../context/TranslationContext';
 
-const DocumentUpload = ({ formData, errors, onFileChange, onRemoveFile }) => {
+const DocumentUpload = ({ formData, errors, onFileChange, onRemoveFile, onUpdateErrors, onUpdateFormData }) => {
     const { isNepali } = useTranslation();
     const [showSizeModal, setShowSizeModal] = useState(false);
     const [currentFileName, setCurrentFileName] = useState('');
     const [currentFileType, setCurrentFileType] = useState('');
-
+   const applicationMode = formData.applicationMode || 'renew';  // Changed default from '' to 'renew'
+const passportType = formData.passportType || 'red';
     const text = {
         title: isNepali ? 'कागजात अपलोड गर्नुहोस्' : 'Document Upload',
+        applicationMode: isNepali ? 'आवेदन प्रकार' : 'Application Type',
+        newApplication: isNepali ? 'नयाँ आवेदन' : 'New Application',
+        renewApplication: isNepali ? 'नवीकरण आवेदन' : 'Renew Application',
+        passportType: isNepali ? 'पासपोर्ट प्रकार' : 'Passport Type',
+        greenPassport: isNepali ? 'हरियो पासपोर्ट (MRP)' : 'Green Passport (MRP)',
+        redPassport: isNepali ? 'रातो पासपोर्ट' : 'Red Passport',
         clickToUpload: isNepali ? 'अपलोड गर्न क्लिक गर्नुहोस्' : 'Click to upload',
         supported: isNepali ? 'समर्थित: PDF, JPG, PNG (अधिकतम 2MB)' : 'Supported: PDF, JPG, PNG (Max 2MB)',
         view: isNepali ? 'हेर्नुहोस्' : 'View',
@@ -21,37 +30,99 @@ const DocumentUpload = ({ formData, errors, onFileChange, onRemoveFile }) => {
         fileSizeError: isNepali ? 'फाइल २MB भन्दा कम हुनुपर्छ' : 'File must be less than 2MB',
         fileSizeModalTitle: isNepali ? 'फाइल साइज त्रुटि' : 'File Size Error',
         fileSizeModalMessage: isNepali ? 'चयन गरिएको फाइल २MB भन्दा बढी छ। कृपया फाइल कम्प्रेस गर्नुहोस् र फेरि प्रयास गर्नुहोस्।' : 'The selected file is larger than 2MB. Please compress the file and try again.',
-        compressionLinkPdf: isNepali ? 'PDF कम्प्रेसनको लागि यहाँ क्लिक गर्नुहोस्' : 'Click here for PDF compression',
-        compressionLinkImage: isNepali ? 'इमेज कम्प्रेसनको लागि यहाँ क्लिक गर्नुहोस्' : 'Click here for image compression',
+        compressionLinkPdf: isNepali ? 'PDF कम्प्रेसनको लागि यहाँ क्लिक गर्नुहोस्' : 'Compress PDF ',
+        compressionLinkImage: isNepali ? 'इमेज कम्प्रेसनको लागि यहाँ क्लिक गर्नुहोस्' : 'Compress Image',
         close: isNepali ? 'बन्द गर्नुहोस्' : 'Close',
-        fileName: isNepali ? 'फाइल नाम' : 'File Name'
+        fileName: isNepali ? 'फाइल नाम' : 'File Name',
+        required: isNepali ? 'आवश्यक' : 'Required',
+        optional: isNepali ? 'वैकल्पिक' : 'Optional'
     };
 
-    const documentConfig = isNepali
-        ? [
-            { name: 'passport_front', label: 'पासपोर्ट अगाडिको पाना', accept: '.pdf,.jpg,.jpeg,.png', required: true },
-            { name: 'valid_visa', label: 'वैध भिसा', accept: '.pdf,.jpg,.jpeg,.png', required: false },
-            { name: 'labor_visa_front', label: 'लेबर भिसा अगाडिको पाना', accept: '.pdf,.jpg,.jpeg,.png', required: true },
-            { name: 'labor_visa_back', label: 'लेबर भिसा पछाडिको पाना', accept: '.pdf,.jpg,.jpeg,.png', required: false },
-            { name: 'arrival', label: 'आगमन कागजात', accept: '.pdf,.jpg,.jpeg,.png', required: true },
-            { name: 'agreement_paper', label: 'सम्झौता कागजात', accept: '.pdf,.jpg,.jpeg,.png', required: true },
-            { name: 'passport_back', label: 'पासपोर्ट पछाडिको पाना (MRP भए आवश्यक छैन)', accept: '.pdf,.jpg,.jpeg,.png', required: true },
-            { name: 'previous_visa', label: 'अघिल्लो भिसा', accept: '.pdf,.jpg,.jpeg,.png', required: false },
-            { name: 'departure', label: 'प्रस्थान कागजात', accept: '.pdf,.jpg,.jpeg,.png', required: true },
-            { name: 'further_info', label: 'थप जानकारी', accept: '.pdf,.jpg,.jpeg,.png', required: false }
-        ]
-        : [
-            { name: 'passport_front', label: 'Passport Front', accept: '.pdf,.jpg,.jpeg,.png', required: true },
-            { name: 'valid_visa', label: 'Valid Visa', accept: '.pdf,.jpg,.jpeg,.png', required: false },
-            { name: 'labor_visa_front', label: 'Labor Visa card(front)', accept: '.pdf,.jpg,.jpeg,.png', required: true },
-            { name: 'labor_visa_back', label: 'Labor Visa card(back)', accept: '.pdf,.jpg,.jpeg,.png', required: false },
-            { name: 'arrival', label: 'Arrival', accept: '.pdf,.jpg,.jpeg,.png', required: true },
-            { name: 'agreement_paper', label: 'Agreement Paper', accept: '.pdf,.jpg,.jpeg,.png', required: true },
-            { name: 'passport_back', label: 'Passport back (If MRP passport not needed)', accept: '.pdf,.jpg,.jpeg,.png', required: true },
-            { name: 'previous_visa', label: 'Previous Visa', accept: '.pdf,.jpg,.jpeg,.png', required: false },
-            { name: 'departure', label: 'Departure', accept: '.pdf,.jpg,.jpeg,.png', required: true },
-            { name: 'further_info', label: 'Further Info', accept: '.pdf,.jpg,.jpeg,.png', required: false }
-        ];
+    // Get document configuration based on application mode and passport type
+    const getDocumentConfig = () => {
+        const baseConfig = isNepali
+            ? [
+                { name: 'passport_front', label: 'पासपोर्ट अगाडिको पाना', accept: '.pdf,.jpg,.jpeg,.png' },
+                { name: 'passport_back', label: 'पासपोर्ट पछाडिको पाना', accept: '.pdf,.jpg,.jpeg,.png' },
+                { name: 'valid_visa', label: 'वैध भिसा', accept: '.pdf,.jpg,.jpeg,.png' },
+                { name: 'labor_visa_front', label: 'लेबर भिसा अगाडिको पाना', accept: '.pdf,.jpg,.jpeg,.png' },
+                { name: 'labor_visa_back', label: 'लेबर भिसा पछाडिको पाना', accept: '.pdf,.jpg,.jpeg,.png' },
+                { name: 'arrival', label: 'आगमन कागजात', accept: '.pdf,.jpg,.jpeg,.png' },
+                { name: 'agreement_paper', label: 'सम्झौता कागजात', accept: '.pdf,.jpg,.jpeg,.png' },
+                { name: 'previous_visa', label: 'अघिल्लो भिसा', accept: '.pdf,.jpg,.jpeg,.png' },
+                { name: 'departure', label: 'प्रस्थान कागजात', accept: '.pdf,.jpg,.jpeg,.png' },
+                { name: 'further_info', label: 'थप जानकारी', accept: '.pdf,.jpg,.jpeg,.png' }
+            ]
+            : [
+                { name: 'passport_front', label: 'Passport Front', accept: '.pdf,.jpg,.jpeg,.png' },
+                { name: 'passport_back', label: 'Passport Back', accept: '.pdf,.jpg,.jpeg,.png' },
+                { name: 'valid_visa', label: 'Valid Visa', accept: '.pdf,.jpg,.jpeg,.png' },
+                { name: 'labor_visa_front', label: 'Labor Visa Card (Front)', accept: '.pdf,.jpg,.jpeg,.png' },
+                { name: 'labor_visa_back', label: 'Labor Visa Card (Back)', accept: '.pdf,.jpg,.jpeg,.png' },
+                { name: 'arrival', label: 'Arrival', accept: '.pdf,.jpg,.jpeg,.png' },
+                { name: 'agreement_paper', label: 'Agreement Paper', accept: '.pdf,.jpg,.jpeg,.png' },
+                { name: 'previous_visa', label: 'Previous Visa', accept: '.pdf,.jpg,.jpeg,.png' },
+                { name: 'departure', label: 'Departure', accept: '.pdf,.jpg,.jpeg,.png' },
+                { name: 'further_info', label: 'Further Info', accept: '.pdf,.jpg,.jpeg,.png' }
+            ];
+
+        // Set required fields based on application mode and passport type
+        return baseConfig.map(doc => {
+            let required = false;
+
+            // Common requirements for both application types
+            if (doc.name === 'passport_front') required = true;
+            if (doc.name === 'valid_visa') required = true;
+
+            // New application specific requirements
+            if (applicationMode === 'new') {
+                if (doc.name === 'agreement_paper') required = true;
+                if (doc.name === 'passport_back' && passportType === 'green') required = true;
+            }
+            // Renew application specific requirements
+            else if (applicationMode === 'renew') {
+                if (doc.name === 'labor_visa_front') required = true;
+                if (doc.name === 'labor_visa_back') required = true;
+                if (doc.name === 'arrival') required = true;
+                if (doc.name === 'passport_back' && passportType === 'green') required = true;
+            }
+
+            return { ...doc, required };
+        });
+    };
+
+    const documentConfig = getDocumentConfig();
+    const validateDocuments = useCallback(() => {
+        const newErrors = {};
+        const config = getDocumentConfig();
+
+        config.forEach(doc => {
+            if (doc.required && !formData[doc.name]) {
+                const errorKey = doc.name;
+                newErrors[errorKey] = isNepali
+                    ? `${doc.label} आवश्यक छ`
+                    : `${doc.label} is required`;
+            }
+        });
+
+        // Update parent component errors
+        if (Object.keys(newErrors).length > 0) {
+            onUpdateErrors(newErrors);
+            return false;
+        }
+
+        // Clear any existing errors if validation passes
+        onUpdateErrors({});
+        return true;
+    }, [applicationMode, passportType, formData, isNepali, onUpdateErrors]);
+    // Add this useEffect after the existing useEffect
+    useEffect(() => {
+        // Expose validation function to parent component
+        const element = document.querySelector('[data-document-upload]');
+        if (element) {
+            element._validateDocuments = validateDocuments;
+        }
+    }, [validateDocuments]);
 
     const handleFileChange = (event) => {
         const file = event.target.files[0];
@@ -62,7 +133,7 @@ const DocumentUpload = ({ formData, errors, onFileChange, onRemoveFile }) => {
         if (file.size > maxSize) {
             // Clear the input
             event.target.value = '';
-            
+
             // Show modal with error message
             setCurrentFileName(file.name);
             setCurrentFileType(file.type);
@@ -130,17 +201,17 @@ const DocumentUpload = ({ formData, errors, onFileChange, onRemoveFile }) => {
 
     const handleCompressionClick = () => {
         // Determine compression URL based on file type
-        const compressionUrl = currentFileType === 'application/pdf' 
+        const compressionUrl = currentFileType === 'application/pdf'
             ? 'https://www.ilovepdf.com/compress_pdf'
             : 'https://nepalishram.com/image-compression';
-        
+
         window.open(compressionUrl, '_blank');
         setShowSizeModal(false);
     };
 
     const getCompressionLinkText = () => {
-        return currentFileType === 'application/pdf' 
-            ? text.compressionLinkPdf 
+        return currentFileType === 'application/pdf'
+            ? text.compressionLinkPdf
             : text.compressionLinkImage;
     };
 
@@ -154,14 +225,14 @@ const DocumentUpload = ({ formData, errors, onFileChange, onRemoveFile }) => {
                         <AlertCircle className="w-6 h-6 text-red-500 mr-2" />
                         <h3 className="text-lg font-semibold text-gray-900">{text.fileSizeModalTitle}</h3>
                     </div>
-                    
+
                     <div className="mb-4">
                         <p className="text-sm text-gray-600 mb-2">
                             <span className="font-medium">{text.fileName}:</span> {currentFileName}
                         </p>
                         <p className="text-sm text-gray-800">{text.fileSizeModalMessage}</p>
                     </div>
-                    
+
                     <div className="flex gap-3">
                         <button
                             onClick={handleCompressionClick}
@@ -181,34 +252,99 @@ const DocumentUpload = ({ formData, errors, onFileChange, onRemoveFile }) => {
         );
     };
 
-    const getFileSizeError = (fieldName) => {
-        // Check if there's a file size error for this field
-        return errors[fieldName] && errors[fieldName].includes('2MB');
-    };
-
     return (
-        <div className="space-y-6">
+        <div className="space-y-6" data-document-upload>
             <div className="flex items-center mb-6">
                 <Upload className="w-6 h-6 text-blue-500 mr-2" />
                 <h2 className="text-xl font-semibold text-gray-900">{text.title}</h2>
             </div>
 
+            <div className="bg-white border border-gray-200 rounded-lg p-4">
+                <div className="flex items-center mb-4">
+                    <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center mr-3">
+                        <FileText className="w-5 h-5 text-blue-600" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-800">{text.applicationMode}</h3>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {['new', 'renew'].map((mode) => (
+                        <label key={mode} className="cursor-pointer">
+                            <input
+                                type="radio"
+                                name="applicationMode"
+                                value={mode}
+                                checked={applicationMode === mode}
+                                onChange={(e) => onUpdateFormData({ applicationMode: e.target.value })}
+                                className="sr-only"
+                            />
+                            <div className={`border p-4 rounded-lg ${applicationMode === mode ? 'border-blue-500 bg-blue-50' : 'border-gray-200 bg-white'}`}>
+                                <div className="flex items-center space-x-3">
+                                    <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${applicationMode === mode ? 'border-blue-500 bg-blue-500' : 'border-gray-300'}`}>
+                                        {applicationMode === mode && <div className="w-2 h-2 bg-white rounded-full"></div>}
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-medium text-gray-800">
+                                            {mode === 'new' ? text.newApplication : text.renewApplication}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </label>
+                    ))}
+                </div>
+            </div>
+
+            <div className="bg-white border border-gray-200 rounded-lg p-4 mt-6">
+                <div className="flex items-center mb-4">
+                    <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center mr-3">
+                        <Upload className="w-5 h-5 text-purple-600" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-800">{text.passportType}</h3>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {['green', 'red'].map((type) => (
+                        <label key={type} className="cursor-pointer">
+                            <input
+                                type="radio"
+                                name="passportType"
+                                value={type}
+                                checked={passportType === type}
+                                onChange={(e) => onUpdateFormData({ passportType: e.target.value })}
+                                className="sr-only"
+                            />
+                            <div className={`border p-4 rounded-lg ${passportType === type ? 'border-green-500 bg-green-50' : 'border-gray-200 bg-white'}`}>
+                                <div className="flex items-center space-x-3">
+                                    <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${passportType === type ? 'border-green-500 bg-green-500' : 'border-gray-300'}`}>
+                                        {passportType === type && <div className="w-2 h-2 bg-white rounded-full"></div>}
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-medium text-gray-800">
+                                            {type === 'green' ? text.greenPassport : text.redPassport}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </label>
+                    ))}
+                </div>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {documentConfig.map((doc) => (
                     <div key={doc.name} className="relative">
-                        <input 
-                            type="file" 
-                            name={doc.name} 
-                            onChange={handleFileChange} 
-                            accept={doc.accept} 
-                            className="hidden" 
-                            id={doc.name} 
+                        <input
+                            type="file"
+                            name={doc.name}
+                            onChange={handleFileChange}
+                            accept={doc.accept}
+                            className="hidden"
+                            id={doc.name}
                         />
 
                         {formData[doc.name] ? (
                             <div className="relative">
                                 {/* Preview */}
-                                <div className="h-48 rounded-lg overflow-hidden border-2 border-green-300 bg-white">
+                                <div className={`h-48 rounded-lg overflow-hidden border-2 ${doc.required ? 'border-green-300' : 'border-blue-300'} bg-white`}>
                                     {formData[doc.name].type?.startsWith('image/') ? (
                                         <img
                                             src={formData[doc.name].base64}
@@ -225,7 +361,9 @@ const DocumentUpload = ({ formData, errors, onFileChange, onRemoveFile }) => {
                                         </div>
                                     )}
                                     <div className="absolute top-2 left-2 bg-white bg-opacity-90 px-2 py-1 rounded text-xs font-medium text-gray-900">
-                                        {doc.label} {doc.required && <span className="text-red-500">*</span>}
+                                        {doc.label}
+                                        {doc.required && <span className="text-red-500 ml-1">*</span>}
+                                        {!doc.required && <span className="text-gray-500 ml-1">({text.optional})</span>}
                                     </div>
                                     <button
                                         onClick={() => onRemoveFile(doc.name)}
@@ -259,14 +397,20 @@ const DocumentUpload = ({ formData, errors, onFileChange, onRemoveFile }) => {
                         ) : (
                             <label
                                 htmlFor={doc.name}
-                                className="block border-2 border-dashed border-gray-300 rounded-lg p-6 h-48 text-center hover:border-blue-400 transition-colors cursor-pointer flex flex-col items-center justify-center"
+                                className={`block border-2 border-dashed rounded-lg p-6 h-48 text-center hover:border-blue-400 transition-colors cursor-pointer flex flex-col items-center justify-center ${doc.required ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                                    }`}
                             >
-                                <Upload className="w-12 h-12 text-gray-400 mb-4" />
+                                <Upload className={`w-12 h-12 mb-4 ${doc.required ? 'text-red-400' : 'text-gray-400'}`} />
                                 <h3 className="text-lg font-bold text-gray-900 mb-2">
-                                    {doc.label} {doc.required && <span className="text-red-500">*</span>}
+                                    {doc.label}
+                                    {doc.required && <span className="text-red-500 ml-1">*</span>}
+                                    {/* {!doc.required && <span className="text-gray-500 text-sm ml-1">({text.optional})</span>} */}
                                 </h3>
                                 <p className="text-sm text-blue-600 font-medium">{text.clickToUpload}</p>
                                 <p className="text-xs text-gray-500 mt-2">{text.supported}</p>
+                                {doc.required && (
+                                    <p className="text-xs text-red-600 mt-1 font-medium">{text.required}</p>
+                                )}
                             </label>
                         )}
 
