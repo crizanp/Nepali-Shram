@@ -9,8 +9,8 @@ const DocumentUpload = ({ formData, errors, onFileChange, onRemoveFile, onUpdate
     const [showSizeModal, setShowSizeModal] = useState(false);
     const [currentFileName, setCurrentFileName] = useState('');
     const [currentFileType, setCurrentFileType] = useState('');
-   const applicationMode = formData.applicationMode || 'renew';  // Changed default from '' to 'renew'
-const passportType = formData.passportType || 'red';
+    const applicationMode = formData.applicationMode || 'renew';  // Changed default from '' to 'renew'
+    const passportType = formData.passportType || 'red';
     const text = {
         title: isNepali ? 'कागजात अपलोड गर्नुहोस्' : 'Document Upload',
         applicationMode: isNepali ? 'आवेदन प्रकार' : 'Application Type',
@@ -96,22 +96,30 @@ const passportType = formData.passportType || 'red';
         const newErrors = {};
         const config = getDocumentConfig();
 
-        config.forEach(doc => {
-            if (doc.required && !formData[doc.name]) {
-                const errorKey = doc.name;
-                newErrors[errorKey] = isNepali
+        // Count required documents and uploaded required documents
+        const requiredDocs = config.filter(doc => doc.required);
+        let uploadedCount = 0;
+
+        requiredDocs.forEach(doc => {
+            if (!formData[doc.name]) {
+                newErrors[doc.name] = isNepali
                     ? `${doc.label} आवश्यक छ`
                     : `${doc.label} is required`;
+            } else {
+                uploadedCount++;
             }
         });
 
-        // Update parent component errors
+       
+
+        console.log('DocumentUpload validateDocuments - formData:', formData);
+        console.log('DocumentUpload validateDocuments - newErrors:', newErrors);
+
         if (Object.keys(newErrors).length > 0) {
             onUpdateErrors(newErrors);
             return false;
         }
 
-        // Clear any existing errors if validation passes
         onUpdateErrors({});
         return true;
     }, [applicationMode, passportType, formData, isNepali, onUpdateErrors]);
@@ -123,27 +131,108 @@ const passportType = formData.passportType || 'red';
             element._validateDocuments = validateDocuments;
         }
     }, [validateDocuments]);
+const compressImage = (file, maxSizeKB = 60) => {
+    return new Promise((resolve) => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        const img = new Image();
 
-    const handleFileChange = (event) => {
-        const file = event.target.files[0];
-        if (!file) return;
+        img.onload = () => {
+            // Reduce dimensions for higher compression
+            const MAX_WIDTH = 900;
+            const MAX_HEIGHT = 900;
 
-        // Check file size (2MB = 2 * 1024 * 1024 bytes)
-        const maxSize = 2 * 1024 * 1024; // 2MB in bytes
-        if (file.size > maxSize) {
-            // Clear the input
-            event.target.value = '';
+            let { width, height } = img;
 
-            // Show modal with error message
-            setCurrentFileName(file.name);
-            setCurrentFileType(file.type);
-            setShowSizeModal(true);
-            return;
+            if (width > height) {
+                if (width > MAX_WIDTH) {
+                    height = (height * MAX_WIDTH) / width;
+                    width = MAX_WIDTH;
+                }
+            } else {
+                if (height > MAX_HEIGHT) {
+                    width = (width * MAX_HEIGHT) / height;
+                    height = MAX_HEIGHT;
+                }
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+
+            ctx.drawImage(img, 0, 0, width, height);
+
+            // Start with quality 0.6 and reduce to as low as 0.1
+            let quality = 0.6;
+            const minQuality = 0.1;
+            const targetSize = maxSizeKB * 1024;
+
+            const tryCompress = () => {
+                canvas.toBlob((blob) => {
+                    if (blob.size <= targetSize || quality <= minQuality) {
+                        const compressedFile = new File([blob], file.name, { type: file.type, lastModified: Date.now() });
+                        resolve(compressedFile);
+                    } else {
+                        quality -= 0.1;
+                        tryCompress();
+                    }
+                }, file.type, quality);
+            };
+
+            tryCompress();
+        };
+
+        img.src = URL.createObjectURL(file);
+    });
+};
+
+const handleFileChange = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Check file size (2MB = 2 * 1024 * 1024 bytes)
+    const maxSize = 2 * 1024 * 1024; // 2MB in bytes
+
+    // For files larger than 2MB, show the modal
+    if (file.size > maxSize) {
+        // Clear the input
+        event.target.value = '';
+        setCurrentFileName(file.name);
+        setCurrentFileType(file.type);
+        setShowSizeModal(true);
+        return;
+    }
+
+    // Compress all images regardless of size
+    if (file.type.startsWith('image/')) {
+        try {
+            console.log(`Compressing image: ${file.name} (${(file.size / 1024).toFixed(0)}KB)`);
+
+            const compressedFile = await compressImage(file, 100); // Compress to ~100KB
+
+            console.log(`Compressed to: ${(compressedFile.size / 1024).toFixed(0)}KB`);
+
+            // Update form data with compressed file
+            const newEvent = {
+                ...event,
+                target: {
+                    ...event.target,
+                    files: [compressedFile],
+                    name: event.target.name // <-- Ensure name is preserved!
+                }
+            };
+            onFileChange(newEvent);
+
+        } catch (error) {
+            console.error('Compression failed:', error);
+            // If compression fails, proceed with original file
+            onFileChange(event);
         }
-
-        // If file size is OK, proceed with normal file handling
+    } else {
+        // If not an image, proceed with normal file handling
         onFileChange(event);
-    };
+    }
+};
+
 
     const handleViewDocument = (document, label) => {
         if (!document || !document.base64) {

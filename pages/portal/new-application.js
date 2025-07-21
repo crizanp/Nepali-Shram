@@ -378,10 +378,10 @@ export default function ApplicationForm() {
 
     const validateStep2 = useCallback(() => {
         // Get the DocumentUpload component's validation function
-        const documentUploadElement = document.querySelector('[data-document-upload]');
-        if (documentUploadElement && documentUploadElement._validateDocuments) {
-            return documentUploadElement._validateDocuments();
-        }
+const documentUploadElement = document.querySelector('[data-document-upload]');
+if (documentUploadElement && documentUploadElement._validateDocuments) {
+    return documentUploadElement._validateDocuments();
+}
 
         // Fallback validation - check required documents based on current settings
         const newErrors = {};
@@ -423,6 +423,9 @@ export default function ApplicationForm() {
                 newErrors.passport_back = text.passportBackRequired;
             }
         }
+
+        console.log('validateStep2 - formData:', formData);
+        console.log('validateStep2 - newErrors:', newErrors);
 
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
