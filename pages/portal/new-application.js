@@ -8,6 +8,7 @@ import Footer from '@/components/footer';
 import { useTranslation } from '@/context/TranslationContext';
 import ApplicationStatusDisplay from '@/components/ApplicationStatusDisplay';
 import ApplicationFormDisplay from '@/components/ApplicationFormDisplay';
+import SubmissionModal from '@/components/SubmissionModal';
 export default function ApplicationForm() {
     const { isNepali } = useTranslation();
     const [currentStep, setCurrentStep] = useState(1);
@@ -61,7 +62,7 @@ export default function ApplicationForm() {
 
         // Success/Error messages
         submissionSuccess: isNepali ? 'आवेदन सफलतापूर्वक पेश गरियो!' : 'Application submitted successfully!',
-        applicationNumberIs: isNepali ? 'तपाईंको आवेदन नम्बर छ:' : 'Your application number is:',
+        applicationNumberIs: isNepali ? 'आवेदन सफलतापूर्वक पेश गरियो!' : 'Application submitted successfully!',
         submissionError: isNepali ? 'आवेदन पेश गर्न त्रुटि:' : 'Error submitting application:',
 
         // Authentication messages
@@ -145,7 +146,13 @@ export default function ApplicationForm() {
     });
 
     const [errors, setErrors] = useState({});
-
+    const [modal, setModal] = useState({
+        isOpen: false,
+        type: 'success', // 'success' or 'error'
+        title: '',
+        message: '',
+        applicationNumber: null
+    });
     // Authentication check
     useEffect(() => {
         async function checkAuthentication() {
@@ -378,10 +385,10 @@ export default function ApplicationForm() {
 
     const validateStep2 = useCallback(() => {
         // Get the DocumentUpload component's validation function
-const documentUploadElement = document.querySelector('[data-document-upload]');
-if (documentUploadElement && documentUploadElement._validateDocuments) {
-    return documentUploadElement._validateDocuments();
-}
+        const documentUploadElement = document.querySelector('[data-document-upload]');
+        if (documentUploadElement && documentUploadElement._validateDocuments) {
+            return documentUploadElement._validateDocuments();
+        }
 
         // Fallback validation - check required documents based on current settings
         const newErrors = {};
@@ -477,7 +484,14 @@ if (documentUploadElement && documentUploadElement._validateDocuments) {
         // Clear errors when going back
         setErrors({});
     }, []);
+    const handleModalClose = useCallback(() => {
+        setModal(prev => ({ ...prev, isOpen: false }));
 
+        // If it was a success modal, redirect to application page
+        if (modal.type === 'success') {
+            router.push('/application');
+        }
+    }, [modal.type, router]);
     // Form submission
     const handleSubmit = useCallback(async () => {
         if (!validateStep4()) {
@@ -513,7 +527,6 @@ if (documentUploadElement && documentUploadElement._validateDocuments) {
                     departure: formData.departure?.base64 || null,
                     further_info: formData.further_info?.base64 || null,
                     payment_proof: formData.payment_proof?.base64 || null,
-
                 },
 
                 // Metadata
@@ -536,9 +549,25 @@ if (documentUploadElement && documentUploadElement._validateDocuments) {
 
             const result = await response.json();
             console.log('Application submitted successfully:', result);
-            const applicationNumber = result.applicationNumber || result.application_number || result.id || 'N/A';
+            const applicationNumber = result.data?.applicationNumber ||
+                result.data?.application_number ||
+                result.data?.id ||
+                result.applicationNumber ||
+                result.application_number ||
+                result.id ||
+                result.application?.id ||
+                result.application?.applicationNumber ||
+                'N/A';
 
-            alert(`${text.submissionSuccess} `);
+            console.log('Full API response:', result); // Add this to debug what the API returns
+            // Show success modal instead of alert
+            setModal({
+                isOpen: true,
+                type: 'success',
+                title: text.submissionSuccess,
+                message: '', // Empty message since we're showing application number separately
+                applicationNumber: applicationNumber
+            });
 
             // Reset form
             setFormData({
@@ -564,16 +593,22 @@ if (documentUploadElement && documentUploadElement._validateDocuments) {
 
             setCurrentStep(1);
             setErrors({});
-            router.push('/application');
 
         } catch (error) {
             console.error('Submission error:', error);
-            alert(`${text.submissionError} ${error.message}`);
+
+            // Show error modal instead of alert
+            setModal({
+                isOpen: true,
+                type: 'error',
+                title: isNepali ? 'त्रुटि' : 'Error',
+                message: `${text.submissionError} ${error.message}`,
+                applicationNumber: null
+            });
         } finally {
             setSubmitting(false);
         }
-    }, [validateStep3, formData, router, text.submissionSuccess, text.applicationNumberIs, text.submissionError]);
-
+    }, [validateStep4, formData, router, text.submissionSuccess, text.applicationNumberIs, text.submissionError, isNepali]);
     // Step navigation from review
     const goToStep = useCallback((step) => {
         setCurrentStep(step);
@@ -690,7 +725,15 @@ if (documentUploadElement && documentUploadElement._validateDocuments) {
                     </div>
                 </div>
             </div>
-
+            <SubmissionModal
+                isOpen={modal.isOpen}
+                onClose={handleModalClose}
+                type={modal.type}
+                title={modal.title}
+                message={modal.message}
+                applicationNumber={modal.applicationNumber}
+                isNepali={isNepali}
+            />
             <Footer />
         </>)
 }
