@@ -4,6 +4,7 @@ import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { authApi } from '../utils/api';
 import { Eye, EyeOff, Lock, UserPlus, Mail, User } from 'lucide-react';
+import ReCAPTCHA from "react-google-recaptcha";
 
 export default function Signup() {
   const [name, setName] = useState('');
@@ -17,6 +18,7 @@ export default function Signup() {
   const [emailSent, setEmailSent] = useState(false);
   const [resendLoading, setResendLoading] = useState(false);
   const [resendMessage, setResendMessage] = useState('');
+  const [captchaValue, setCaptchaValue] = useState('');
   const [touched, setTouched] = useState({
     name: false,
     email: false,
@@ -24,8 +26,15 @@ export default function Signup() {
     confirmPassword: false
   });
   const nameInputRef = useRef(null);
+  const recaptchaRef = useRef();
 
   const router = useRouter();
+
+  // Handle captcha change
+  const handleCaptchaChange = (value) => {
+    setCaptchaValue(value);
+    setError('');
+  };
 
   // Validation functions
   const validateName = (name) => {
@@ -68,7 +77,8 @@ export default function Signup() {
       name.trim() &&
       email.trim() &&
       password &&
-      confirmPassword;
+      confirmPassword &&
+      captchaValue; // Add captcha validation
   };
 
   const handleBlur = (field) => {
@@ -78,6 +88,12 @@ export default function Signup() {
   // SIGNUP FUNCTION
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Check captcha first
+    if (!captchaValue) {
+      setError('Please verify that you are not a robot.');
+      return;
+    }
 
     // Mark all fields as touched to show validation errors
     setTouched({
@@ -409,6 +425,15 @@ export default function Signup() {
               )}
             </div>
 
+            {/* reCAPTCHA */}
+            <div className="my-4 flex justify-center">
+              <ReCAPTCHA
+                ref={recaptchaRef}
+                sitekey="6Lc0-oorAAAAAOL3gE_-LChcXo1_wsk53JmoEMuy"
+                onChange={handleCaptchaChange}
+              />
+            </div>
+
             {/* Sign Up Button */}
             <button
               type="submit"
@@ -437,6 +462,19 @@ export default function Signup() {
           {/* Password Requirements */}
           <div className="mt-4 text-xs text-gray-500">
             <p className="mb-1">Password must contain at least 6 characters</p>
+          </div>
+
+          {/* Direct WhatsApp Contact */}
+          <div className="mt-4 text-center text-sm text-gray-600">
+            Need help? Contact us directly on WhatsApp for quick assistance.
+            <a
+              href="https://wa.me/9779708023083"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="ml-2 text-[#25D366] font-medium hover:underline"
+            >
+              Chat on WhatsApp
+            </a>
           </div>
         </div>
       </div>
