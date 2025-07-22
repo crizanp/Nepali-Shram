@@ -33,25 +33,90 @@ const PaymentUpload = ({ formData, errors, onFileChange, onRemoveFile }) => {
         fileName: isNepali ? 'फाइल नाम' : 'File Name'
     };
 
-    const handleFileChange = (event) => {
+    const compressImage = (file, maxSizeKB = 60) => {
+        return new Promise((resolve) => {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const img = new Image();
+
+            img.onload = () => {
+                // Reduce dimensions for higher compression
+                const MAX_WIDTH = 900;
+                const MAX_HEIGHT = 900;
+
+                let { width, height } = img;
+                if (width > height) {
+                    if (width > MAX_WIDTH) {
+                        height = (height * MAX_WIDTH) / width;
+                        width = MAX_WIDTH;
+                    }
+                } else {
+                    if (height > MAX_HEIGHT) {
+                        width = (width * MAX_HEIGHT) / height;
+                        height = MAX_HEIGHT;
+                    }
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+                ctx.drawImage(img, 0, 0, width, height);
+
+                let quality = 0.6;
+                const minQuality = 0.1;
+                const targetSize = maxSizeKB * 1024;
+
+                const tryCompress = () => {
+                    canvas.toBlob((blob) => {
+                        if (blob.size <= targetSize || quality <= minQuality) {
+                            const compressedFile = new File([blob], file.name, { type: file.type, lastModified: Date.now() });
+                            resolve(compressedFile);
+                        } else {
+                            quality -= 0.1;
+                            tryCompress();
+                        }
+                    }, file.type, quality);
+                };
+
+                tryCompress();
+            };
+
+            img.src = URL.createObjectURL(file);
+        });
+    };
+
+    const handleFileChange = async (event) => {
         const file = event.target.files[0];
         if (!file) return;
 
-        // Check file size (2MB = 2 * 1024 * 1024 bytes)
         const maxSize = 2 * 1024 * 1024; // 2MB in bytes
         if (file.size > maxSize) {
-            // Clear the input
             event.target.value = '';
-            
-            // Show modal with error message
             setCurrentFileName(file.name);
             setCurrentFileType(file.type);
             setShowSizeModal(true);
             return;
         }
 
-        // If file size is OK, proceed with normal file handling
-        onFileChange(event);
+        // Compress all images before upload
+        if (file.type.startsWith('image/')) {
+            try {
+                const compressedFile = await compressImage(file, 60); // ~60KB
+                const newEvent = {
+                    ...event,
+                    target: {
+                        ...event.target,
+                        files: [compressedFile],
+                        name: event.target.name
+                    }
+                };
+                onFileChange(newEvent);
+            } catch (error) {
+                console.error('Compression failed:', error);
+                onFileChange(event);
+            }
+        } else {
+            onFileChange(event);
+        }
     };
 
     const handleViewDocument = (document, label) => {

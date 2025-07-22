@@ -4,6 +4,7 @@ import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { authApi } from '../utils/api';
 import { Eye, EyeOff, Lock, LogIn, Mail, RefreshCw } from 'lucide-react';
+import ReCAPTCHA from "react-google-recaptcha";
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -15,12 +16,23 @@ export default function Login() {
   const [unverifiedEmail, setUnverifiedEmail] = useState('');
   const [resendingVerification, setResendingVerification] = useState(false);
   const [verificationMessage, setVerificationMessage] = useState('');
+  const [captchaValue, setCaptchaValue] = useState('');
   const emailInputRef = useRef(null);
+  const recaptchaRef = useRef();
 
   const router = useRouter();
 
+  const handleCaptchaChange = (value) => {
+    setCaptchaValue(value);
+    setError('');
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!captchaValue) {
+      setError('Please verify that you are not a robot.');
+      return;
+    }
     setLoading(true);
     setError('');
     setUnverifiedEmail('');
@@ -225,25 +237,23 @@ export default function Login() {
               </Link>
             </div>
 
+            {/* reCAPTCHA */}
+            <div className="my-4 flex justify-center">
+              <ReCAPTCHA
+                ref={recaptchaRef}
+                sitekey="6LcN-IorAAAAAMM0BaQOFo0YC24pWQIp0hdZ1pqI"
+                onChange={handleCaptchaChange}
+              />
+            </div>
+
             {/* Sign In Button */}
             <button
-              type="button"
-              onClick={handleSubmit}
+              type="submit"
               disabled={loading}
               className="w-full text-white font-bold py-4 px-6 rounded-lg transition-all duration-200 flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl transform hover:scale-105 disabled:transform-none cursor-pointer disabled:cursor-not-allowed"
               style={{
                 backgroundColor: loading ? '#6b8cb8' : '#003479',
                 ':hover': { backgroundColor: '#002050' }
-              }}
-              onMouseEnter={(e) => {
-                if (!loading) {
-                  e.target.style.backgroundColor = '#002050';
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!loading) {
-                  e.target.style.backgroundColor = '#003479';
-                }
               }}
             >
               <LogIn className="h-5 w-5" />
@@ -266,7 +276,20 @@ export default function Login() {
               </p>
             </div>
           )}
+           {/* Direct WhatsApp Contact */}
+        <div className="mt-4 text-center text-sm text-gray-600">
+          Need help? Contact us directly on WhatsApp for quick assistance.
+         <a
+              href="https://wa.me/9779708023083"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="ml-2 text-[#25D366] font-medium hover:underline"
+            >
+            Chat on WhatsApp
+          </a>
         </div>
+        </div>
+       
       </div>
     </>
   );
