@@ -161,104 +161,107 @@ export default function Login() {
 
           {/* Login Form */}
           <div className="space-y-4">
-            {/* Email Input */}
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <Mail className="h-5 w-5 text-gray-400" />
-              </div>
-              <input
-                ref={emailInputRef}
-                id="email-address"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                placeholder="Email address"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent outline-none text-gray-700 placeholder-gray-400 transition-all duration-200"
-                style={{ focusRingColor: '#003479' }}
-                onFocus={(e) => e.target.style.boxShadow = '0 0 0 2px #003479'}
-                onBlur={(e) => e.target.style.boxShadow = 'none'}
-              />
-            </div>
-
-            {/* Password Input */}
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <Lock className="h-5 w-5 text-gray-400" />
-              </div>
-              <input
-                id="password"
-                name="password"
-                type={showPassword ? "text" : "password"}
-                autoComplete="current-password"
-                required
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full pl-12 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent outline-none text-gray-700 placeholder-gray-400 transition-all duration-200"
-                onFocus={(e) => e.target.style.boxShadow = '0 0 0 2px #003479'}
-                onBlur={(e) => e.target.style.boxShadow = 'none'}
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-0 pr-4 flex items-center hover:bg-gray-50 rounded-r-lg transition-colors duration-200 cursor-pointer"
-              >
-                {showPassword ? (
-                  <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                ) : (
-                  <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                )}
-              </button>
-            </div>
-
-            {/* Remember Me and Forgot Password */}
-            <div className="flex items-center justify-between flex-wrap gap-2 text-sm">
-              <label htmlFor="remember-me" className="flex items-center cursor-pointer text-gray-900">
+            <form onSubmit={handleSubmit}>
+              {/* Email Input */}
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <Mail className="h-5 w-5 text-gray-400" />
+                </div>
                 <input
-                  id="remember-me"
-                  name="remember-me"
-                  type="checkbox"
-                  className="h-4 w-4 border-gray-300 rounded mr-2 cursor-pointer"
-                  style={{ accentColor: '#003479' }}
-                  checked={rememberMe}
-                  onChange={(e) => setRememberMe(e.target.checked)}
+                  ref={emailInputRef}
+                  id="email-address"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  placeholder="Email address"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full  pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent outline-none text-gray-700 placeholder-gray-400 transition-all duration-200"
+                  style={{ focusRingColor: '#003479' }}
+                  onFocus={(e) => e.target.style.boxShadow = '0 0 0 2px #003479'}
+                  onBlur={(e) => e.target.style.boxShadow = 'none'}
                 />
-                Remember me
-              </label>
+              </div>
 
-              <Link
-                href="/forgot-password"
-                className="text-[#003479] font-medium hover:underline transition-colors duration-200"
+              {/* Password Input */}
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <Lock className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  id="password"
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  autoComplete="current-password"
+                  required
+                  placeholder="Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full my-4 pl-12 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent outline-none text-gray-700 placeholder-gray-400 transition-all duration-200"
+                  onFocus={(e) => e.target.style.boxShadow = '0 0 0 2px #003479'}
+                  onBlur={(e) => e.target.style.boxShadow = 'none'}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-4 flex items-center hover:bg-gray-50 rounded-r-lg transition-colors duration-200 cursor-pointer"
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                  ) : (
+                    <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                  )}
+                </button>
+              </div>
+
+              {/* Remember Me and Forgot Password */}
+              <div className="flex items-center justify-between flex-wrap gap-2 text-sm">
+                <label htmlFor="remember-me" className="flex items-center cursor-pointer text-gray-900">
+                  <input
+                    id="remember-me"
+                    name="remember-me"
+                    type="checkbox"
+                    className="h-4 w-4 border-gray-300 rounded mr-2 cursor-pointer"
+                    style={{ accentColor: '#003479' }}
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
+                  />
+                  Remember me
+                </label>
+
+                <Link
+                  href="/forgot-password"
+                  className="text-[#003479] font-medium hover:underline transition-colors duration-200"
+                >
+                  Forgot your password?
+                </Link>
+              </div>
+
+              {/* reCAPTCHA */}
+              <div className="my-4 flex justify-center">
+                <ReCAPTCHA
+                  ref={recaptchaRef}
+                  sitekey="6Lc0-oorAAAAAOL3gE_-LChcXo1_wsk53JmoEMuy"
+                  onChange={handleCaptchaChange}
+                />
+              </div>
+
+
+              {/* Sign In Button */}
+              <button
+                type="submit"
+                disabled={loading || !email || !password || !captchaValue}
+                className={`w-full font-bold py-4 px-6 rounded-lg transition-all duration-200 flex items-center justify-center space-x-2 shadow-lg transform ${loading || !email || !password || !captchaValue
+                    ? 'bg-gray-400 cursor-not-allowed'
+                    : 'bg-[#003479] hover:shadow-xl hover:scale-105'
+                  } text-white`}
               >
-                Forgot your password?
-              </Link>
-            </div>
+                <LogIn className="h-5 w-5" />
+                <span>{loading ? 'Signing in...' : 'SIGN IN'}</span>
+              </button>
 
-            {/* reCAPTCHA */}
-            <div className="my-4 flex justify-center">
-              <ReCAPTCHA
-                ref={recaptchaRef}
-                sitekey="6LcN-IorAAAAAMM0BaQOFo0YC24pWQIp0hdZ1pqI"
-                onChange={handleCaptchaChange}
-              />
-            </div>
-
-            {/* Sign In Button */}
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full text-white font-bold py-4 px-6 rounded-lg transition-all duration-200 flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl transform hover:scale-105 disabled:transform-none cursor-pointer disabled:cursor-not-allowed"
-              style={{
-                backgroundColor: loading ? '#6b8cb8' : '#003479',
-                ':hover': { backgroundColor: '#002050' }
-              }}
-            >
-              <LogIn className="h-5 w-5" />
-              <span>{loading ? 'Signing in...' : 'SIGN IN'}</span>
-            </button>
+            </form>
           </div>
 
           {/* Additional Help */}
@@ -276,20 +279,20 @@ export default function Login() {
               </p>
             </div>
           )}
-           {/* Direct WhatsApp Contact */}
-        <div className="mt-4 text-center text-sm text-gray-600">
-          Need help? Contact us directly on WhatsApp for quick assistance.
-         <a
+          {/* Direct WhatsApp Contact */}
+          <div className="mt-4 text-center text-sm text-gray-600">
+            Need help? Contact us directly on WhatsApp for quick assistance.
+            <a
               href="https://wa.me/9779708023083"
               target="_blank"
               rel="noopener noreferrer"
               className="ml-2 text-[#25D366] font-medium hover:underline"
             >
-            Chat on WhatsApp
-          </a>
+              Chat on WhatsApp
+            </a>
+          </div>
         </div>
-        </div>
-       
+
       </div>
     </>
   );
